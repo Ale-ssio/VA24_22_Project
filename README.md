@@ -9,3 +9,5 @@
 
  ## Distribution
  Execute command `npm run build`, to create the distribution version inside the _dist_ folder. In the distribution version all the files are minified and optimized for running in the browser.
+
+ 
