@@ -48,6 +48,9 @@ print('Explained variability per principal component: {}'.format(pca.explained_v
 # dimensions causes a lot of information loss: almost 76% of information
 # is loss when we project data only on 2 dimensions.
 
+# Convert the new dataframe to a csv dataset without saving the row names.
+df.to_csv('VA_per90_pca.csv', index=False)
+
 ###########################################################################
 
 import matplotlib.pyplot as plt
