@@ -3,9 +3,45 @@ import * as d3 from 'd3'
 // Import the CSS file.
 import './index.scss'
 
+// Define the title of the project.
+const title = "---PLACEHOLDER---";
 // Define the margins.
 const margin = { top: 20, left: 20 };
 
+/***************************************************************************************************************
+ * HEADER                                                                                                      *
+ ***************************************************************************************************************/
+// Add the logo of the page in the top left corner.
+const logoWidth = 40;
+const logoHeight = 40;
+const logoGroup = d3.select(".icon")
+  .append("svg")
+  .attr("class", "logo")
+  .attr("width", logoWidth)
+  .attr("height", logoHeight);
+// Define the button to reload the home page.
+const homeButton = logoGroup
+  .append("image")
+  .attr("href", `/img/soccer.svg`)
+  .attr("class", "logoButton")
+  .attr("alt", "Home")
+  .attr("id", "Home")
+  .attr("width", logoWidth)
+  .attr("height", logoHeight)
+  .style("cursor", "pointer")
+homeButton.on("click", function() {
+  window.location.reload();
+});
+// Add the title of the project near the logo.
+const titleWidth = 300;
+const titleHeight = 40;
+d3.select(".icon")
+  .append("text")
+  .attr("class", "title")
+  .attr("width", titleWidth)
+  .attr("height", titleHeight)
+  .text(title);
+  
 /***************************************************************************************************************
  * SCATTERPLOT                                                                                                 *
  ***************************************************************************************************************/

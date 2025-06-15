@@ -10,15 +10,35 @@ body {
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 50px 1fr 1fr 1fr;
   grid-template-areas:
-    "scatterplot field search"
-    "market radar comparison";
+    "logo logo logo"
+    "scatterplot field similar"
+    "market radar comparison"
+    "correlation radar comparison";
 }
 
 .uiButton {
   vertical-align: middle;
   cursor: pointer;
+}
+
+.icon {
+  grid-area: logo;
+  vertical-align: middle;
+}
+
+.logo {
+  width: 50px;
+  justify-content: left;
+  vertical-align: middle;
+}
+
+.title {
+  justify-content: right;
+  vertical-align: middle;
+  font-family: fantasy;
+  font-size: 30px;
 }
 
 .scatterplot {
