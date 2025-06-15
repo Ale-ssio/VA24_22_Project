@@ -13,7 +13,7 @@ body {
   grid-template-rows: 1fr 1fr;
   grid-template-areas:
     "scatterplot field search"
-    "market comparison star";
+    "market radar comparison";
 }
 
 .uiButton {
@@ -27,8 +27,14 @@ body {
 
 .field {
   grid-area: field;
-  margin-left: 20px;
   text-align: center;
+  justify-content: center;
+}
+
+.radar {
+  grid-area: radar;
+  text-align: center;
+  justify-content: center;
 }
 
 .league-button {
