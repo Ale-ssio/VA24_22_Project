@@ -2,7 +2,7 @@
 import * as d3 from 'd3';
 import { drawRadarChart } from './radarChart.js';
 
-export function initializeScatterplot(state, plot) {
+export function initializeScatterplot(state, plot, market) {
   // Define the margins.
   const margin = { top: 20, left: 20 };
   // Define the size of the scatterplot.
@@ -69,6 +69,7 @@ export function initializeScatterplot(state, plot) {
   plot.colorScale = d3.scaleOrdinal()
     .domain(["fr Ligue 1", "es La Liga", "eng Premier League", "de Bundesliga", "it Serie A"])
     .range(d3.schemeTableau10);
+  market.colorScale = plot.colorScale;
   return;
 }
 
@@ -109,6 +110,7 @@ export function draw(data, state, plot, radar) {
       })
       .on("click", (event, d) => {
         state.selectedPlayerKey = `${d.Player}-${d.Squad}`;
+        plot.tooltip.style("opacity", 0);
         drawRadarChart(d, state, radar);
         draw(data, state, plot, radar); // Redraw to update selected styling.
       });

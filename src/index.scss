@@ -81,7 +81,7 @@ body {
 }
 
 .leagueButton.selected {
-  background-color: steelblue;
+  background-color: #2b8cbe;
   color: white;
 }
 
@@ -95,7 +95,7 @@ body {
 }
 
 .positionButton.selected {
-  background-color: steelblue;
+  background-color: #2b8cbe;
   color: white;
   font-weight: bold;
 }
@@ -108,4 +108,8 @@ body {
 
 .position {
   transition: fill 0.2s ease;
+}
+
+rect.selection {
+  fill: #2b8cbe;
 }

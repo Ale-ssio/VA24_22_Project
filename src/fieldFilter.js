@@ -1,8 +1,9 @@
 // fieldFilter.js
 import * as d3 from 'd3';
 import { draw } from './scatterplot.js';
+import { computeBoxplot } from './marketFilter.js';
 
-export function initializeFieldFilter(state, field, plot, radar) {
+export function initializeFieldFilter(state, field, plot, radar, market) {
   // Define the size of the drawing of the field.
   const fieldWidth = 160;
   const fieldHeight = 240;
@@ -10,6 +11,8 @@ export function initializeFieldFilter(state, field, plot, radar) {
   d3.select(".field")
     .append("div")
     .style("margin", "4px")
+    .style("text-align", "center")
+    .style("font-weight", "bold")
     .text("FILTER BY POSITION:");
   // Define the svg containing the drawing.
   field.fieldsvg = d3.select(".field")
@@ -144,12 +147,12 @@ export function initializeFieldFilter(state, field, plot, radar) {
           band.attr("fill", positionColors[pos]).style("opacity", 0.5);
           state.selectedPositions.add(pos);
         }
-        filterData(state, plot, radar);
+        filterData(state, plot, radar, market);
       });
   });
 }
 
-export function filterData(state, plot, radar) {
+export function filterData(state, plot, radar, market) {
   /*
     Each time some filter is applied I need to compute
     the new set of data that will be represented.
@@ -184,6 +187,13 @@ export function filterData(state, plot, radar) {
       return tokens.some(p => state.selectedPositions.has(p));
     });
   }
+  /*
+    Apply the crossfilter on the market value by selecting only those 
+    rows of the dataset such that the market value is contained in the brushed range.
+  */
+  filtered = filtered.filter(d => +d.market_value_in_eur >= market.minMarket && +d.market_value_in_eur <= market.maxMarket);
   state.filteredData = filtered;
+  // After a filter is applied compute again the boxplot on the new set of data.
+  computeBoxplot(state.filteredData, market);
   draw(state.filteredData, state, plot, radar);
 }

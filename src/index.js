@@ -12,6 +12,7 @@ import { filterData } from './fieldFilter.js';
 import { initializeRadarChart } from './radarChart.js';
 import { emptyRadar } from './radarChart.js';
 import { drawRadarChart } from './radarChart.js';
+import { computeBoxplot, initializeMarketValueFilter } from './marketFilter.js';
 import './index.scss';
 
 (async function initApp() {
@@ -27,7 +28,8 @@ import './index.scss';
     selectedPlayerKey: null,
     allData: data,
     filteredData: data,
-    zoom: null
+    zoom: null,
+    cf: null
   };
 
   let plot = {
@@ -61,15 +63,30 @@ import './index.scss';
     radarGroup: null
   }
 
-  initializeScatterplot(state, plot);
+  let market = {
+    marketDim: null,
+    minMarket: 0,
+    maxMarket: Infinity,
+    colorScale: null,
+    q1Val: [],
+    medianVal: [],
+    q3Val: [],
+    minVal: [],
+    maxVal: [],
+    league: []
+  }
+
+  initializeScatterplot(state, plot, market);
   initializeHeader();
-  initializeMinutesFilter(state, plot, radar);
-  initializeLeagueButtons(state, plot, radar);
+  initializeMinutesFilter(state, plot, radar, market);
+  initializeLeagueButtons(state, plot, radar, market);
   initializeResetButton(state, plot, radar);
-  initializeFieldFilter(state, field, plot, radar);
+  initializeFieldFilter(state, field, plot, radar, market);
   initializeRadarChart(radar);
   emptyRadar(state, radar, plot);
   defineZoom(state, plot, radar);
+  initializeMarketValueFilter(state, plot, radar, market);
+  computeBoxplot(state.filteredData, market);
 
   draw(state.filteredData, state, plot, radar);
 

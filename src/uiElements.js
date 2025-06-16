@@ -39,7 +39,7 @@ export function initializeHeader() {
     .text(title);
 }
 
-export function initializeMinutesFilter(state, plot, radar) {
+export function initializeMinutesFilter(state, plot, radar, market) {
   const container = d3.select(".minutes");
   // Add a checkbox to keep only player with at least 500 minutes played.
   const checkbox = container.append("input")
@@ -53,7 +53,7 @@ export function initializeMinutesFilter(state, plot, radar) {
       radar.radarGroup.selectAll(".axisLabel").remove();
       state.selectedPlayerKey = null;
       emptyRadar(state, radar, plot);
-      filterData(state, plot, radar);
+      filterData(state, plot, radar, market);
     });
 
   container.append("text")
@@ -61,7 +61,7 @@ export function initializeMinutesFilter(state, plot, radar) {
     .text("LOAD ONLY PLAYERS WITH AT LEAST 500 MINUTES");
 }
 
-export function initializeLeagueButtons(state, plot, radar) {
+export function initializeLeagueButtons(state, plot, radar, market) {
   /* 
     Select the div with class "scatterplot" in the html page
     and append a group to it to add buttons to select the league. 
@@ -106,7 +106,7 @@ export function initializeLeagueButtons(state, plot, radar) {
           state.selectedLeagues.add(league);
         }
         // Update the data points drawn in the scatterplot w.r.t. the current selection.
-        filterData(state, plot, radar);
+        filterData(state, plot, radar, market);
       });
     /* 
       I created the buttons and their behavior after being clicked, but there is still

@@ -8,7 +8,8 @@ export function initializeRadarChart(radar) {
     .attr("id", "radarchart")
     .attr("width", radar.radarWidth)
     .attr("height", radar.radarHeight)
-    .attr("viewBox", [0, 0, radar.radarWidth, radar.radarHeight]);
+    .attr("viewBox", [0, 0, radar.radarWidth, radar.radarHeight])
+    .attr("transform", `translate(0, 35)`);
   // Define the group that will contain the elements of the radar chart.
   radar.radarGroup = radar.radarsvg.append("g")
     .attr("id", "radarGroup")
