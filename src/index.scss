@@ -12,7 +12,7 @@ body {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 50px 1fr 1fr 1fr;
   grid-template-areas:
-    "logo logo logo"
+    "icon icon minutes"
     "scatterplot field similar"
     "market radar comparison"
     "correlation radar comparison";
@@ -24,7 +24,7 @@ body {
 }
 
 .icon {
-  grid-area: logo;
+  grid-area: icon;
   vertical-align: middle;
 }
 
@@ -39,6 +39,17 @@ body {
   vertical-align: middle;
   font-family: fantasy;
   font-size: 30px;
+}
+
+.minutes {
+  grid-area: minutes;
+  justify-content: left;
+  vertical-align: middle;
+  text-align: center;
+}
+
+#minutesFilter {
+  vertical-align: middle;
 }
 
 .scatterplot {
@@ -57,7 +68,7 @@ body {
   justify-content: center;
 }
 
-.league-button {
+.leagueButton {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -69,12 +80,12 @@ body {
   cursor: pointer;
 }
 
-.league-button.selected {
+.leagueButton.selected {
   background-color: steelblue;
   color: white;
 }
 
-.position-button {
+.positionButton {
   margin: 2px;
   padding: 5px 10px;
   background-color: lightgray;
@@ -83,13 +94,13 @@ body {
   cursor: pointer;
 }
 
-.position-button.selected {
+.positionButton.selected {
   background-color: steelblue;
   color: white;
   font-weight: bold;
 }
 
-.band-group text {
+.bandGroup text {
   pointer-events: none; // ensures only the band triggers events
   user-select: none;
   transition: opacity 0.2s ease;
