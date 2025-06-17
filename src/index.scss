@@ -10,7 +10,7 @@ body {
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 50px 1fr 1fr 1fr;
+  grid-template-rows: 30px 1fr 1fr 1fr;
   grid-template-areas:
     "icon icon minutes"
     "scatterplot field similar"
@@ -38,7 +38,7 @@ body {
   justify-content: right;
   vertical-align: middle;
   font-family: fantasy;
-  font-size: 30px;
+  font-size: 25px;
 }
 
 .minutes {
@@ -64,6 +64,16 @@ body {
 
 .radar {
   grid-area: radar;
+  text-align: center;
+  justify-content: center;
+}
+
+.market {
+  grid-area: market;
+}
+
+.correlation {
+  grid-area: correlation;
   text-align: center;
   justify-content: center;
 }

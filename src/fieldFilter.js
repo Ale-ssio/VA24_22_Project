@@ -2,8 +2,9 @@
 import * as d3 from 'd3';
 import { draw } from './scatterplot.js';
 import { computeBoxplot } from './marketFilter.js';
+import { drawCorrelationHistogram } from './correlation.js';
 
-export function initializeFieldFilter(state, field, plot, radar, market) {
+export function initializeFieldFilter(state, field, plot, radar, market, comparison) {
   // Define the size of the drawing of the field.
   const fieldWidth = 160;
   const fieldHeight = 240;
@@ -147,12 +148,12 @@ export function initializeFieldFilter(state, field, plot, radar, market) {
           band.attr("fill", positionColors[pos]).style("opacity", 0.5);
           state.selectedPositions.add(pos);
         }
-        filterData(state, plot, radar, market);
+        filterData(state, plot, radar, market, comparison);
       });
   });
 }
 
-export function filterData(state, plot, radar, market) {
+export function filterData(state, plot, radar, market, comparison) {
   /*
     Each time some filter is applied I need to compute
     the new set of data that will be represented.
@@ -195,5 +196,6 @@ export function filterData(state, plot, radar, market) {
   state.filteredData = filtered;
   // After a filter is applied compute again the boxplot on the new set of data.
   computeBoxplot(state.filteredData, market);
+  drawCorrelationHistogram(state.filteredData, radar, comparison);
   draw(state.filteredData, state, plot, radar);
 }

@@ -174,7 +174,7 @@ export function drawRadarChart(player, state, radar) {
       .attr("font-size", "12px")
       .attr("fill", "#555555")
       .text(`${player.Squad} (${player.Comp})`);
-    // Add the player's market value below the chart.
+    // Add the player's market value and age below the chart.
     radar.radarGroup.append("text")
       .attr("class", "playerInfo")
       .attr("y", radar.radarRadius + 60)
@@ -182,6 +182,6 @@ export function drawRadarChart(player, state, radar) {
       .attr("font-size", "30px")
       .attr("fill", "#000000")
       .attr("font-weight", "bold")
-      .text(`€${(player.market_value_in_eur / 1e6).toFixed(1)}M`);
+      .text(`€${(player.market_value_in_eur / 1e6).toFixed(1)}M (${parseInt(player.Age)} yo)`);
 }
 

@@ -8,8 +8,8 @@ export function initializeHeader() {
   // Define the title of the project.
   const title = "---PLACEHOLDER---";
   // Add the logo of the page in the top left corner.
-  const logoWidth = 40;
-  const logoHeight = 40;
+  const logoWidth = 30;
+  const logoHeight = 30;
   const logoGroup = d3.select(".icon")
     .append("svg")
     .attr("class", "logo")
@@ -30,7 +30,7 @@ export function initializeHeader() {
   });
   // Add the title of the project near the logo.
   const titleWidth = 300;
-  const titleHeight = 40;
+  const titleHeight = 30;
   d3.select(".icon")
     .append("text")
     .attr("class", "title")
@@ -39,7 +39,7 @@ export function initializeHeader() {
     .text(title);
 }
 
-export function initializeMinutesFilter(state, plot, radar, market) {
+export function initializeMinutesFilter(state, plot, radar, market, comparison) {
   const container = d3.select(".minutes");
   // Add a checkbox to keep only player with at least 500 minutes played.
   const checkbox = container.append("input")
@@ -53,15 +53,15 @@ export function initializeMinutesFilter(state, plot, radar, market) {
       radar.radarGroup.selectAll(".axisLabel").remove();
       state.selectedPlayerKey = null;
       emptyRadar(state, radar, plot);
-      filterData(state, plot, radar, market);
+      filterData(state, plot, radar, market, comparison);
     });
 
   container.append("text")
     .style("font-weight", "bold")
-    .text("LOAD ONLY PLAYERS WITH AT LEAST 500 MINUTES");
+    .html("LOAD ONLY PLAYERS WITH AT LEAST <strong style='color:blue'> 500 </strong> MINUTES");
 }
 
-export function initializeLeagueButtons(state, plot, radar, market) {
+export function initializeLeagueButtons(state, plot, radar, market, comparison) {
   /* 
     Select the div with class "scatterplot" in the html page
     and append a group to it to add buttons to select the league. 
@@ -106,7 +106,7 @@ export function initializeLeagueButtons(state, plot, radar, market) {
           state.selectedLeagues.add(league);
         }
         // Update the data points drawn in the scatterplot w.r.t. the current selection.
-        filterData(state, plot, radar, market);
+        filterData(state, plot, radar, market, comparison);
       });
     /* 
       I created the buttons and their behavior after being clicked, but there is still

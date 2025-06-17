@@ -3,7 +3,7 @@ import * as d3 from 'd3';
 import crossfilter from 'crossfilter2';
 import { filterData } from './fieldFilter.js';
 
-export function initializeMarketValueFilter(state, plot, radar, market) {
+export function initializeMarketValueFilter(state, plot, radar, market, comparison) {
   // Initialize the crossfilter to select the range of market values.
   const marketWidth = 500;
   const marketHeight = 30;
@@ -21,13 +21,13 @@ export function initializeMarketValueFilter(state, plot, radar, market) {
     .append("svg")
     .attr("class", "boxplots")
     .attr("width", marketWidth + margin.left + margin.right)
-    .attr("height", 1.5*marketHeight + margin.top + margin.bottom)
+    .attr("height", 1.5*marketHeight + margin.bottom)
     .attr("transform", `translate(${margin.left},${margin.top})`);
   // Define the svg for the crossfilter selector.
   const container = d3.select(".market")
     .append("svg")
     .attr("width", marketWidth + margin.left + margin.right)
-    .attr("height", marketHeight + margin.top + margin.bottom)
+    .attr("height", marketHeight + 2*margin.top)
     .append("g")
     .attr("transform", `translate(${margin.left},0)`);
   /* 
@@ -85,7 +85,7 @@ export function initializeMarketValueFilter(state, plot, radar, market) {
     const [min, max] = event.selection.map(x.invert);
     market.minMarket = min;
     market.maxMarket = max;
-    filterData(state, plot, radar, market)
+    filterData(state, plot, radar, market, comparison)
   }
 }
 

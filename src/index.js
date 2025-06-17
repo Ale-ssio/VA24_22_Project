@@ -1,18 +1,18 @@
 // index.js (Main Entry Point)
 import { loadData } from './dataLoader.js';
-import { initializeLeagueButtons } from './uiElements.js';
-import { initializeHeader } from './uiElements.js';
-import { initializeResetButton } from './uiElements.js';
-import { initializeMinutesFilter } from './uiElements.js';
-import { defineZoom } from './uiElements.js';
-import { initializeScatterplot } from './scatterplot.js';
-import { draw } from './scatterplot.js';
+import { initializeLeagueButtons,
+         initializeHeader,
+         initializeResetButton,
+         initializeMinutesFilter,
+         defineZoom } from './uiElements.js';
+import { initializeScatterplot,
+         draw } from './scatterplot.js';
 import { initializeFieldFilter } from './fieldFilter.js';
-import { filterData } from './fieldFilter.js';
-import { initializeRadarChart } from './radarChart.js';
-import { emptyRadar } from './radarChart.js';
-import { drawRadarChart } from './radarChart.js';
-import { computeBoxplot, initializeMarketValueFilter } from './marketFilter.js';
+import { initializeRadarChart,
+         emptyRadar } from './radarChart.js';
+import { computeBoxplot, 
+         initializeMarketValueFilter } from './marketFilter.js';
+import { drawCorrelationHistogram } from './correlation.js';
 import './index.scss';
 
 (async function initApp() {
@@ -76,17 +76,23 @@ import './index.scss';
     league: []
   }
 
+  let comparison = {
+    compLabels: [],
+    compStats: []
+  }
+
   initializeScatterplot(state, plot, market);
   initializeHeader();
-  initializeMinutesFilter(state, plot, radar, market);
-  initializeLeagueButtons(state, plot, radar, market);
+  initializeMinutesFilter(state, plot, radar, market, comparison);
+  initializeLeagueButtons(state, plot, radar, market, comparison);
   initializeResetButton(state, plot, radar);
-  initializeFieldFilter(state, field, plot, radar, market);
+  initializeFieldFilter(state, field, plot, radar, market, comparison);
   initializeRadarChart(radar);
   emptyRadar(state, radar, plot);
   defineZoom(state, plot, radar);
-  initializeMarketValueFilter(state, plot, radar, market);
+  initializeMarketValueFilter(state, plot, radar, market, comparison);
   computeBoxplot(state.filteredData, market);
+  drawCorrelationHistogram(state.filteredData, radar, comparison);
 
   draw(state.filteredData, state, plot, radar);
 
