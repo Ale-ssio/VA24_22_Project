@@ -78,6 +78,12 @@ body {
   justify-content: center;
 }
 
+.comparison {
+  grid-area: comparison;
+  text-align: center;
+  justify-content: center;
+}
+
 .leagueButton {
   display: inline-flex;
   align-items: center;

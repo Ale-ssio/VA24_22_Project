@@ -125,7 +125,7 @@ export function initializeLeagueButtons(state, plot, radar, market, comparison) 
   });
 }
 
-export function defineZoom(state, plot, radar) {
+export function defineZoom(state, plot, radar, comparison) {
   state.zoom = d3.zoom()
     .scaleExtent([1, 30])
     .on("zoom", function(event) {
@@ -134,13 +134,13 @@ export function defineZoom(state, plot, radar) {
       plot.xScale = transform.rescaleX(plot.originalXScale);
       plot.yScale = transform.rescaleY(plot.originalYScale);
       // Redraw points to apply changes.
-      draw(state.filteredData, state, plot, radar);
+      draw(state.filteredData, state, plot, radar, comparison);
     });
   // Apply zoom to the SVG of the scatterplot.
   plot.plotsvg.call(state.zoom);
 }
 
-export function initializeResetButton(state, plot, radar) {
+export function initializeResetButton(state, plot, radar, comparison) {
   // Define a new group for the resize button.
   const uiGroup = plot.plotsvg
     .append("g")
@@ -166,6 +166,6 @@ export function initializeResetButton(state, plot, radar) {
       plot.xScale = plot.originalXScale.copy();
       plot.yScale = plot.originalYScale.copy();
       // Redraw points to apply changes.
-      draw(state.filteredData, state, plot, radar);
+      draw(state.filteredData, state, plot, radar, comparison);
     });
 }

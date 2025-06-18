@@ -7,7 +7,9 @@ function pearsonCorrelation(x, y) {
   const meanY = d3.mean(y);
   const stdX = d3.deviation(x);
   const stdY = d3.deviation(y);
-  // Correlation = Covariance(x, y) / Std(x) * Std(y)
+  // Avoid division by 0 or NaN.
+  if (!stdX || !stdY || isNaN(stdX) || isNaN(stdY)) return 0; 
+  // Correlation = Covariance(x, y) / Std(x) * Std(y).
   const cov = d3.sum(x.map((xi, i) => (xi - meanX) * (y[i] - meanY))) / (n - 1);
   return cov / (stdX * stdY);
 }
@@ -46,7 +48,7 @@ export function drawCorrelationHistogram(data, radar, comparison) {
     const yVals = data.map(d => +d[key]);
     const r = pearsonCorrelation(xVals, yVals);
     return { key, r };
-  });
+  }).filter(d => !isNaN(d.r));
   /* 
     Take the content of the correlations array, sort it on the value
     of the correlation and take only the 5 most correlated attributes

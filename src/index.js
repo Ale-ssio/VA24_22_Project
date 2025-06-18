@@ -13,6 +13,8 @@ import { initializeRadarChart,
 import { computeBoxplot, 
          initializeMarketValueFilter } from './marketFilter.js';
 import { drawCorrelationHistogram } from './correlation.js';
+import { initializePlayerComparison,
+         drawPlayerComparison } from './comparison.js';
 import './index.scss';
 
 (async function initApp() {
@@ -26,6 +28,7 @@ import './index.scss';
     selectedPositions: new Set(),
     minutesFilterEnabled: false,
     selectedPlayerKey: null,
+    selectedPlayer: null,
     allData: data,
     filteredData: data,
     zoom: null,
@@ -77,23 +80,28 @@ import './index.scss';
   }
 
   let comparison = {
+    compWidth: 500,
+    compHeight: 350,
     compLabels: [],
-    compStats: []
+    compStats: [],
+    compsvg: null
   }
 
   initializeScatterplot(state, plot, market);
   initializeHeader();
   initializeMinutesFilter(state, plot, radar, market, comparison);
   initializeLeagueButtons(state, plot, radar, market, comparison);
-  initializeResetButton(state, plot, radar);
+  initializeResetButton(state, plot, radar, comparison);
   initializeFieldFilter(state, field, plot, radar, market, comparison);
   initializeRadarChart(radar);
+  initializePlayerComparison(comparison);
   emptyRadar(state, radar, plot);
-  defineZoom(state, plot, radar);
+  defineZoom(state, plot, radar, comparison);
   initializeMarketValueFilter(state, plot, radar, market, comparison);
   computeBoxplot(state.filteredData, market);
   drawCorrelationHistogram(state.filteredData, radar, comparison);
+  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
 
-  draw(state.filteredData, state, plot, radar);
+  draw(state.filteredData, state, plot, radar, comparison);
 
 })();

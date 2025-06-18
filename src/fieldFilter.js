@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { draw } from './scatterplot.js';
 import { computeBoxplot } from './marketFilter.js';
 import { drawCorrelationHistogram } from './correlation.js';
+import { drawPlayerComparison } from './comparison.js';
 
 export function initializeFieldFilter(state, field, plot, radar, market, comparison) {
   // Define the size of the drawing of the field.
@@ -196,6 +197,7 @@ export function filterData(state, plot, radar, market, comparison) {
   state.filteredData = filtered;
   // After a filter is applied compute again the boxplot on the new set of data.
   computeBoxplot(state.filteredData, market);
-  drawCorrelationHistogram(state.filteredData, radar, comparison);
-  draw(state.filteredData, state, plot, radar);
+  if (state.filteredData.length > 0) drawCorrelationHistogram(state.filteredData, radar, comparison);
+  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  draw(state.filteredData, state, plot, radar, comparison);
 }

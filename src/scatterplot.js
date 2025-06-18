@@ -1,6 +1,7 @@
 // scatterplot.js
 import * as d3 from 'd3';
 import { drawRadarChart } from './radarChart.js';
+import { drawPlayerComparison } from './comparison.js';
 
 export function initializeScatterplot(state, plot, market) {
   // Define the margins.
@@ -73,7 +74,7 @@ export function initializeScatterplot(state, plot, market) {
   return;
 }
 
-export function draw(data, state, plot, radar) {
+export function draw(data, state, plot, radar, comparison) {
     const circles = plot.plotGroup.selectAll("circle")
       .data(data, d => d.Player);
     // Remove unneeded elements.
@@ -112,7 +113,8 @@ export function draw(data, state, plot, radar) {
         state.selectedPlayerKey = `${d.Player}-${d.Squad}`;
         plot.tooltip.style("opacity", 0);
         drawRadarChart(d, state, radar);
-        draw(data, state, plot, radar); // Redraw to update selected styling.
+        drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+        draw(data, state, plot, radar, comparison); // Redraw to update selected styling.
       });
     // Raise the selected point after drawing.
     if (state.selectedPlayerKey) {
