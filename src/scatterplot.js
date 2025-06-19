@@ -2,6 +2,7 @@
 import * as d3 from 'd3';
 import { drawRadarChart } from './radarChart.js';
 import { drawPlayerComparison } from './comparison.js';
+import { drawSimilarPlayers } from './similar.js';
 
 export function initializeScatterplot(state, plot, market) {
   // Define the margins.
@@ -110,14 +111,27 @@ export function draw(data, state, plot, radar, comparison) {
         }
       })
       .on("click", (event, d) => {
-        state.selectedPlayerKey = `${d.Player}-${d.Squad}`;
-        plot.tooltip.style("opacity", 0);
-        drawRadarChart(d, state, radar);
-        drawPlayerComparison(state.selectedPlayerKey, state, comparison);
-        draw(data, state, plot, radar, comparison); // Redraw to update selected styling.
+        updateScatterSelection(d, data, state, plot, radar, comparison);
       });
     // Raise the selected point after drawing.
     if (state.selectedPlayerKey) {
       merged.filter(d => `${d.Player}-${d.Squad}` === state.selectedPlayerKey).raise();
     }
+}
+
+export function updateScatterSelection(d, data, state, plot, radar, comparison) {
+  /*
+    Any time some function or some user's action modifies the selected player,
+    there is the need to update the visualizations and to recompute anything
+    that depends on the current selected player. So each function doing that 
+    will call this function, which will change the selected player key and will
+    draw everything again, which means a new point will be highlighted, a new
+    star schema will be computed and new statistic will be compared in the graphs.
+  */
+  state.selectedPlayerKey = `${d.Player}-${d.Squad}`;
+  plot.tooltip.style("opacity", 0);
+  drawRadarChart(d, state, radar);
+  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  drawSimilarPlayers(state, plot, radar, comparison);
+  draw(data, state, plot, radar, comparison);
 }

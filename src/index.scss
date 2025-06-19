@@ -12,7 +12,7 @@ body {
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 30px 1fr 1fr 1fr;
   grid-template-areas:
-    "icon icon minutes"
+    "icon minutes search-bar"
     "scatterplot field similar"
     "market radar comparison"
     "correlation radar comparison";
@@ -52,6 +52,22 @@ body {
   vertical-align: middle;
 }
 
+.search-bar {
+  grid-area: search-bar;
+  justify-content: center;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.suggestion-item {
+  background-color: #ffffff;
+}
+
+.suggestion-item:hover {
+  background-color: #2b8cbe;
+  color: white;
+}
+
 .scatterplot {
   grid-area: scatterplot;
 }
@@ -60,6 +76,25 @@ body {
   grid-area: field;
   text-align: center;
   justify-content: center;
+}
+
+.similar {
+  grid-area: similar;
+  text-align: center;
+  justify-content: center;
+}
+
+.similar-card {
+  background-color: #ffffff;
+}
+
+.similar-card.subtitle {
+  color: #555555;
+}
+
+.similar-card:hover {
+  background-color: #2b8cbe;
+  color: white;
 }
 
 .radar {

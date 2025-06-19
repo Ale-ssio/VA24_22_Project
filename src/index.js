@@ -15,6 +15,8 @@ import { computeBoxplot,
 import { drawCorrelationHistogram } from './correlation.js';
 import { initializePlayerComparison,
          drawPlayerComparison } from './comparison.js';
+import { initializePlayerSearch } from './search.js';
+import { drawSimilarPlayers } from './similar.js';
 import './index.scss';
 
 (async function initApp() {
@@ -95,12 +97,14 @@ import './index.scss';
   initializeFieldFilter(state, field, plot, radar, market, comparison);
   initializeRadarChart(radar);
   initializePlayerComparison(comparison);
+  initializePlayerSearch(state, plot, radar, comparison);
   emptyRadar(state, radar, plot);
   defineZoom(state, plot, radar, comparison);
   initializeMarketValueFilter(state, plot, radar, market, comparison);
   computeBoxplot(state.filteredData, market);
   drawCorrelationHistogram(state.filteredData, radar, comparison);
   drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  drawSimilarPlayers(state, plot, radar, comparison);
 
   draw(state.filteredData, state, plot, radar, comparison);
 
