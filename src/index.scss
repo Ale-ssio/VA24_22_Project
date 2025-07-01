@@ -131,6 +131,11 @@ body {
   cursor: pointer;
 }
 
+.leagueButton:hover {
+  background-color: #555555;
+  color: white;
+}
+
 .leagueButton.selected {
   background-color: #2b8cbe;
   color: white;

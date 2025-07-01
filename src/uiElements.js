@@ -80,9 +80,13 @@ export function initializeLeagueButtons(state, plot, radar, market, comparison) 
       and then saving the rest of the name in the "rest" variable.
     */
     const [country, ...rest] = league.split(" ");
+    // Take the color of that league to color the button.
+    const color = plot.colorScale(league);
     // I already created the group to contain the buttons, so I simply append them.
     const btn = plot.leagueContainer.append("button")
       .attr("class", "leagueButton")
+      .style("border", `1px solid ${color}`)
+      .style("border-top", `5px solid ${color}`)
       /*
         The function classed either sets or unsets a class to the selected element.
         When I click on an element I toggle this class on it and I store in the
@@ -102,8 +106,14 @@ export function initializeLeagueButtons(state, plot, radar, market, comparison) 
         */
         if (isActive) {
           state.selectedLeagues.delete(league);
+          d3.select(this)
+            .style("background-color", "lightgrey")
+            .style("color", "#000000");
         } else {
           state.selectedLeagues.add(league);
+          d3.select(this)
+            .style("background-color", color)
+            .style("color", "white");
         }
         // Update the data points drawn in the scatterplot w.r.t. the current selection.
         filterData(state, plot, radar, market, comparison);

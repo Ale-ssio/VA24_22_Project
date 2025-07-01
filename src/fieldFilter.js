@@ -60,13 +60,6 @@ export function initializeFieldFilter(state, field, plot, radar, market, compari
   */
   const bandHeight = fieldHeight / 4;
   const positions = ['FW', 'MF', 'DF', 'GK'];
-  // Associate a color to each position (following typical conventions).
-  const positionColors = {
-    GK: "#ff9900", // Yellow.
-    DF: "#339933", // Green.
-    MF: "#0033cc", // Blue.
-    FW: "#cc0000"  // Red.
-  };
 
   positions.forEach((pos, i) => {
     // For each position compute the respective y coordinate on the field.
@@ -146,7 +139,7 @@ export function initializeFieldFilter(state, field, plot, radar, market, compari
             respective position color and to add the position to the selected ones.
           */
           d3.select(this).classed("selected", true);
-          band.attr("fill", positionColors[pos]).style("opacity", 0.5);
+          band.attr("fill", "#000000").style("opacity", 0.5);
           state.selectedPositions.add(pos);
         }
         filterData(state, plot, radar, market, comparison);
