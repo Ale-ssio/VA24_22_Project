@@ -51,7 +51,8 @@ export function initializeMinutesFilter(state, plot, radar, market, comparison) 
       radar.radarGroup.selectAll(".playerShape").remove();
       radar.radarGroup.selectAll(".playerInfo").remove();
       radar.radarGroup.selectAll(".axisLabel").remove();
-      state.selectedPlayerKey = null;
+      state.selectedPlayerKeys.clear();
+      state.selectedPlayers.clear();
       emptyRadar(state, radar, plot);
       filterData(state, plot, radar, market, comparison);
     });

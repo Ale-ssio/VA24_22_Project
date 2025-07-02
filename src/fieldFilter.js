@@ -191,6 +191,6 @@ export function filterData(state, plot, radar, market, comparison) {
   // After a filter is applied compute again the boxplot on the new set of data.
   computeBoxplot(state.filteredData, market);
   if (state.filteredData.length > 0) drawCorrelationHistogram(state.filteredData, radar, comparison);
-  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  drawPlayerComparison(state.selectedPlayerKeys, state, comparison);
   draw(state.filteredData, state, plot, radar, comparison);
 }

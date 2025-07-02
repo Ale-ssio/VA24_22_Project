@@ -1,5 +1,6 @@
 // radarChart.js
 import * as d3 from 'd3';
+import { updateScatterSelection } from './scatterplot.js';
 
 export function initializeRadarChart(radar) {
   // Define the svg containing the chart.
@@ -9,11 +10,10 @@ export function initializeRadarChart(radar) {
     .attr("width", radar.radarWidth)
     .attr("height", radar.radarHeight)
     .attr("viewBox", [0, 0, radar.radarWidth, radar.radarHeight])
-    .attr("transform", `translate(0, 35)`);
   // Define the group that will contain the elements of the radar chart.
   radar.radarGroup = radar.radarsvg.append("g")
     .attr("id", "radarGroup")
-    .attr("transform", `translate(${radar.radarWidth / 2}, ${radar.radarHeight / 2})`);
+    .attr("transform", `translate(${radar.radarWidth / 2}, ${radar.radarHeight - radar.radarRadius*1.5})`);
   // Draw the circle and the radii inside the circle.
   radar.radarGroup.append("circle")
     .attr("r", radar.radarRadius)
@@ -55,40 +55,45 @@ export function emptyRadar(state, radar, plot) {
   });
 }
 
-export function drawRadarChart(player, state, radar) {
+export function drawRadarChart(d, state, plot, radar, comparison) {
+  /*
+    Choose the right stats and labels based on position.
+    It makes no sense to compare goalkeepers and other players on the
+    same statistics, so the set of labels is different in the two cases.
+  */
+  const isGK = false;
+  state.selectedPlayers.forEach(p => {
+    if(p.Pos.includes('GK')) isGK = true;
+  });
+  const stats = isGK ? radar.keeperStats : radar.radarStats;
+  const labels = isGK ? radar.keeperLabels : radar.radarLabels;
+  // Draw labels.
+  // Remove any previously drawn shapes or written additional information.
+  radar.radarGroup.selectAll(".axisLine, .axisLabel, .playerShape, .playerInfo").remove();
+  radar.radarsvg.selectAll(".playerInfo").remove();
+  labels.forEach((stat, i) => {
+    const angleSlice = (Math.PI * 2) / radar.radarStats.length;
+    const angle = angleSlice * i - Math.PI / 2;
+    const x = Math.cos(angle) * radar.radarRadius;
+    const y = Math.sin(angle) * radar.radarRadius;
+    const degrees = angle * 180 / Math.PI + 90;
+    radar.radarGroup.append("line")
+      .attr("class", "axisLine")
+      .attr("x1", 0).attr("y1", 0)
+      .attr("x2", x).attr("y2", y)
+      .attr("stroke", "#000000");
+    radar.radarGroup.append("text")
+      .attr("class", "axisLabel")
+      .attr("x", x * 1.2)
+      .attr("y", y * 1.2)
+      .attr("text-anchor", "middle")
+      .attr("alignment-baseline", "middle")
+      .attr("font-size", "10px")
+      .attr("transform", `rotate(${degrees}, ${x * 1.2}, ${y * 1.2})`)
+      .text(stat);
+  });
+  [...state.selectedPlayers].forEach((player, w) => {
     // Draw the radar for the selected player.
-    /*
-      Choose the right stats and labels based on position.
-      It makes no sense to compare goalkeepers and other players on the
-      same statistics, so the set of labels is different in the two cases.
-    */
-    const isGK = player.Pos.includes('GK');
-    const stats = isGK ? radar.keeperStats : radar.radarStats;
-    const labels = isGK ? radar.keeperLabels : radar.radarLabels;
-    // Draw labels.
-    // Remove any previously drawn shapes or written additional information.
-    radar.radarGroup.selectAll(".axisLine, .axisLabel, .playerShape, .playerInfo").remove();
-    labels.forEach((stat, i) => {
-      const angleSlice = (Math.PI * 2) / radar.radarStats.length;
-      const angle = angleSlice * i - Math.PI / 2;
-      const x = Math.cos(angle) * radar.radarRadius;
-      const y = Math.sin(angle) * radar.radarRadius;
-      const degrees = angle * 180 / Math.PI + 90;
-      radar.radarGroup.append("line")
-        .attr("class", "axisLine")
-        .attr("x1", 0).attr("y1", 0)
-        .attr("x2", x).attr("y2", y)
-        .attr("stroke", "#000000");
-      radar.radarGroup.append("text")
-        .attr("class", "axisLabel")
-        .attr("x", x * 1.2)
-        .attr("y", y * 1.2)
-        .attr("text-anchor", "middle")
-        .attr("alignment-baseline", "middle")
-        .attr("font-size", "10px")
-        .attr("transform", `rotate(${degrees}, ${x * 1.2}, ${y * 1.2})`)
-        .text(stat);
-    });
     /*
       Retrieve the position of the player. This is needed because the way in which a
       radar chart works is by showing proportions, not absolute values.
@@ -139,7 +144,7 @@ export function drawRadarChart(player, state, radar) {
     // Compute the points on the chart to draw the polygon.
     const points = stats.map((stat, i) => {
       // One point for each radius of the circle.
-      const angleSlice = (Math.PI * 2) / radar.radarStats.length;
+      const angleSlice = (Math.PI * 2) / stats.length;
       const angle = angleSlice * i - Math.PI / 2;
       // Convert percentile (0-100) to proportion (0-1).
       const value = Math.max(0, Math.min(1, percentiles[stat] / 100));
@@ -149,39 +154,72 @@ export function drawRadarChart(player, state, radar) {
     // Close the path by repeating the first point.
     points.push(points[0]);
     // Draw the shape on the radar.
+    const radarLine = d3.line()
+      .x(d => d[0])
+      .y(d => d[1])
+      .curve(d3.curveLinearClosed);
     radar.radarGroup.append("path")
       .datum(points)
       .attr("class", "playerShape")
-      .attr("fill", "#2b8cbe")
+      .attr("fill", state.colors[w])
       .attr("fill-opacity", 0.4)
-      .attr("stroke", "#2b8cbe")
+      .attr("stroke", state.colors[w])
       .attr("stroke-width", 2)
-      .attr("d", d3.line()(points));
+      .attr("d", radarLine);
     // Add the player's name and position(s) above the chart.
-    radar.radarGroup.append("text")
+    radar.radarsvg.append("rect")
       .attr("class", "playerInfo")
-      .attr("y", -radar.radarRadius - 45)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "16px")
+      .attr("x", 20)
+      .attr("y", w*45 + 20)
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("fill", state.colors[w]);
+    radar.radarsvg.append("text")
+      .attr("class", "playerInfo")
+      .attr("x", 20 + 15)
+      .attr("y", w*45 + 20)
+      .attr("text-anchor", "start")
+      .attr("font-size", "10px")
       .attr("fill", "#000000")
       .attr("font-weight", "bold")
       .text(`${player.Player} (${player.Pos})`);
     // Add the player's team and competition under the name.
-    radar.radarGroup.append("text")
+    radar.radarsvg.append("text")
       .attr("class", "playerInfo")
-      .attr("y", -radar.radarRadius - 30)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
+      .attr("x", 20 + 15)
+      .attr("y", w*45 + 30)
+      .attr("text-anchor", "start")
+      .attr("font-size", "10px")
       .attr("fill", "#555555")
       .text(`${player.Squad} (${player.Comp})`);
     // Add the player's market value and age below the chart.
-    radar.radarGroup.append("text")
+    radar.radarsvg.append("text")
       .attr("class", "playerInfo")
-      .attr("y", radar.radarRadius + 60)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "30px")
+      .attr("x", 20 + 15)
+      .attr("y", w*45 + 45)
+      .attr("text-anchor", "start")
+      .attr("font-size", "10px")
       .attr("fill", "#000000")
       .attr("font-weight", "bold")
       .text(`€${(player.market_value_in_eur / 1e6).toFixed(1)}M (${parseInt(player.Age)} yo)`);
+    // Define the button to deselect the players.
+    const deselectButton = radar.radarsvg
+      .append("image")
+      .attr("href", `/img/remove.svg`)
+      .attr("class", "playerInfo")
+      .attr("x", radar.radarWidth - 25)
+      .attr("y", w*45 + 20)
+      .attr("alt", "deselect")
+      .attr("id", "deselect")
+      .attr("width", 20)
+      .attr("height", 20)
+      .style("cursor", "pointer")
+    deselectButton.on("click", function() {
+      const key = `${player.Player}-${player.Squad}`;
+      state.selectedPlayers.delete(player);
+      state.selectedPlayerKeys.delete(key);
+      updateScatterSelection(null, state.filteredData, state, plot, radar, comparison);
+    });
+  });
 }
 

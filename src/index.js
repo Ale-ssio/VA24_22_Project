@@ -29,8 +29,9 @@ import './index.scss';
     selectedLeagues: new Set(),
     selectedPositions: new Set(),
     minutesFilterEnabled: false,
-    selectedPlayerKey: null,
-    selectedPlayer: null,
+    selectedPlayerKeys: new Set(),
+    selectedPlayers: new Set(),
+    colors: ["#7fc97f", "#beaed4", "#fdc086"],
     allData: data,
     filteredData: data,
     zoom: null,
@@ -62,7 +63,7 @@ import './index.scss';
     keeperLabels: ["Saved Penalties", "Clean Sheets", "% Saves", "Exp. Assists", "Touches", "Prog. Passes", "Goals Conceded", "Severe Errors"],
     keeperStats: ["PKsv_per90", "CS_per90", "Save%_per90", "xAG_per90", "Touches_per90", "PrgP_per90", "GA_per90", "Err_per90", "Int_per90"],
     radarWidth: 250,
-    radarHeight: 300,
+    radarHeight: 385,
     radarRadius: 80,
     radarsvg: null,
     radarGroup: null
@@ -83,10 +84,11 @@ import './index.scss';
 
   let comparison = {
     compWidth: 500,
-    compHeight: 350,
+    compHeight: 300,
     compLabels: [],
     compStats: [],
-    compsvg: null
+    compsvg: null,
+    currentPlayerIndex: 0
   }
 
   initializeScatterplot(state, plot, market);
@@ -96,7 +98,7 @@ import './index.scss';
   initializeResetButton(state, plot, radar, comparison);
   initializeFieldFilter(state, field, plot, radar, market, comparison);
   initializeRadarChart(radar);
-  initializePlayerComparison(comparison);
+  initializePlayerComparison(state, comparison);
   initializePlayerSearch(state, plot, radar, comparison);
   emptyRadar(state, radar, plot);
   defineZoom(state, plot, radar, comparison);

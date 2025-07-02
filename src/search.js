@@ -39,8 +39,14 @@ export function initializePlayerSearch(state, plot, radar, comparison) {
       .style("cursor", "pointer")
       .style("border-bottom", "1px solid #cccccc")
       .on("click", (event, d) => {
-        const playerKey = `${d.Player}-${d.Squad}`;
-        state.selectedPlayerKey = playerKey;
+        if (state.selectedPlayerKeys.size >= 3) {
+          const delKey = state.selectedPlayerKeys.values().next().value;
+          state.selectedPlayerKeys.delete(delKey);
+          const delPlayer = state.selectedPlayers.values().next().value;
+          state.selectedPlayers.delete(delPlayer);
+        }
+        state.selectedPlayerKeys.add(`${d.Player}-${d.Squad}`);
+        state.selectedPlayers.add(d);
         // When you select the player, its name and team are automatically inserted
         // in the search box even if you didn't write the entire name.
         input.property("value", `${d.Player} - ${d.Squad}`);

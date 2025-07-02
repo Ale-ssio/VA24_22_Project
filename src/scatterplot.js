@@ -1,6 +1,7 @@
 // scatterplot.js
 import * as d3 from 'd3';
 import { drawRadarChart } from './radarChart.js';
+import { updatePlayerButtons } from './comparison.js';
 import { drawPlayerComparison } from './comparison.js';
 import { drawSimilarPlayers } from './similar.js';
 
@@ -88,9 +89,9 @@ export function draw(data, state, plot, radar, comparison) {
       .attr("cy", d => plot.yScale(d.y))
       .attr("r", d => plot.rScale(d.market_value_in_eur))
       .attr("fill", d => plot.colorScale(d.Comp))
-      .attr("opacity", d => `${d.Player}-${d.Squad}` === state.selectedPlayerKey ? 1 : 0.5)
-      .attr("stroke", d => `${d.Player}-${d.Squad}` === state.selectedPlayerKey ? "#000000" : "none")
-      .attr("stroke-width", d => `${d.Player}-${d.Squad}` === state.selectedPlayerKey ? 1.5 : 0)
+      .attr("opacity", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? 1 : 0.5)
+      .attr("stroke", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? "#000000" : "none")
+      .attr("stroke-width", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? 1.5 : 0)
       .on("mouseover", (event, d) => {
         plot.tooltip.style("opacity", 1)
           .html(`<strong>${d.Player}</strong>`)
@@ -103,7 +104,7 @@ export function draw(data, state, plot, radar, comparison) {
           .raise(); // Ensure hovered point is on top.
       })
       .on("mouseout", (event, d) => {
-        if (`${d.Player}-${d.Squad}` !== state.selectedPlayerKey) {
+        if (!state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`)) {
           plot.tooltip.style("opacity", 0);
           d3.select(event.currentTarget)
             .attr("opacity", 0.5)
@@ -114,8 +115,8 @@ export function draw(data, state, plot, radar, comparison) {
         updateScatterSelection(d, data, state, plot, radar, comparison);
       });
     // Raise the selected point after drawing.
-    if (state.selectedPlayerKey) {
-      merged.filter(d => `${d.Player}-${d.Squad}` === state.selectedPlayerKey).raise();
+    if (state.selectedPlayerKeys.size > 0) {
+      merged.filter(d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`)).raise();
     }
 }
 
@@ -128,10 +129,23 @@ export function updateScatterSelection(d, data, state, plot, radar, comparison) 
     draw everything again, which means a new point will be highlighted, a new
     star schema will be computed and new statistic will be compared in the graphs.
   */
-  state.selectedPlayerKey = `${d.Player}-${d.Squad}`;
+  comparison.currentPlayerIndex = 0;
+  if (d) {
+    state.selectedPlayerKeys.add(`${d.Player}-${d.Squad}`);
+    state.selectedPlayers.add(d);
+    comparison.currentPlayerIndex = state.selectedPlayers.size - 1;
+  }
+  if (state.selectedPlayerKeys.size > 3) {
+    const delKey = state.selectedPlayerKeys.values().next().value;
+    state.selectedPlayerKeys.delete(delKey);
+    const delPlayer = state.selectedPlayers.values().next().value;
+    state.selectedPlayers.delete(delPlayer);
+  }
   plot.tooltip.style("opacity", 0);
-  drawRadarChart(d, state, radar);
-  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  drawRadarChart(d, state, plot, radar, comparison);
+  updatePlayerButtons(state, comparison);
+  const comparisonPlayer = d ? `${d.Player}-${d.Squad}` : state.selectedPlayerKeys.values().next().value;
+  drawPlayerComparison(comparisonPlayer, state, comparison);
   drawSimilarPlayers(state, plot, radar, comparison);
   draw(data, state, plot, radar, comparison);
 }

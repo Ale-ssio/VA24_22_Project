@@ -1,11 +1,19 @@
 import * as d3 from 'd3';
 
-export function initializePlayerComparison(comparison) {
+export function initializePlayerComparison(state, comparison) {
   // Write the title.
   d3.select(".comparison")
     .append("text")
     .style("font-weight", "bold")
     .text("COMPARISON WITH THE AVERAGE OF THE CURRENT SUBSET:");
+  // Create a container for the buttons to pick a player from the selected ones.
+  d3.select(".comparison")
+    .append("div")
+    .attr("class", "playerButtons")
+    .style("margin", "10px 0")
+    .style("display", "flex")
+    .style("gap", "10px")
+    .style("flex-wrap", "wrap");
   // Define the svg containing the chart.
   comparison.compsvg = d3.select(".comparison")
     .append("svg")
@@ -21,6 +29,69 @@ export function initializePlayerComparison(comparison) {
     .attr("opacity", 0.4)
     .attr("stroke", "black")
     .attr("stroke-width", 2);
+  // Initialize the currently displayed player index.
+  comparison.currentPlayerIndex = state.selectedPlayers.size - 1;
+}
+
+export function updatePlayerButtons(state, comparison) {
+  const buttonContainer = d3.select(".playerButtons");
+  // Clear existing buttons.
+  buttonContainer.selectAll("*").remove();
+  if (state.selectedPlayerKeys.size === 0) {
+    // No players selected, hide buttons.
+    buttonContainer.style("display", "none");
+    return;
+  }
+  // Show buttons container.
+  buttonContainer.style("display", "flex");
+  // Create buttons for each selected player.
+  [...state.selectedPlayerKeys].forEach((playerKey, index) => {
+    // Find the player data to get name and squad.
+    const player = state.allData.find(d => `${d.Player}-${d.Squad}` === playerKey);
+    const buttonText = player ? `${player.Player} (${player.Squad})` : playerKey;
+    const button = buttonContainer
+      .append("button")
+      .attr("class", "player-btn")
+      .style("padding", "2px 2px")
+      .style("border", "2px solid")
+      .style("border-radius", "4px")
+      .style("background-color", index === comparison.currentPlayerIndex ? state.colors[index] : "lightgrey")
+      .style("color", index === comparison.currentPlayerIndex ? "white" : "#000000")
+      .style("cursor", "pointer")
+      .style("font-size", "10px")
+      .style("font-weight", "bold")
+      .style("transition", "all 0.2s")
+      .text(buttonText)
+      .on("click", function() {
+        // Update current player index.
+        comparison.currentPlayerIndex = index;
+        // Update button styles.
+        buttonContainer.selectAll(".player-btn")
+          .style("background-color", "lightgrey")
+          .style("color", "#000000");
+        d3.select(this)
+          .style("background-color", state.colors[index])
+          .style("color", "white");
+        // Redraw comparison for the selected player
+        drawPlayerComparison(playerKey, state, comparison);
+      })
+      .on("mouseover", function() {
+        if (index !== comparison.currentPlayerIndex) {
+          d3.select(this)
+            .style("background-color", "#000000")
+            .style("color", "white")
+            .style("opacity", "0.7");
+        }
+      })
+      .on("mouseout", function() {
+        if (index !== comparison.currentPlayerIndex) {
+          d3.select(this)
+            .style("background-color", "lightgrey")
+            .style("color", "black")
+            .style("opacity", "1");
+        }
+      });
+  });
 }
 
 export function drawPlayerComparison(playerKey, state, comparison) {
@@ -225,14 +296,6 @@ export function drawPlayerComparison(playerKey, state, comparison) {
       .attr("font-weight", "bold")
       .text(label);
   });
-  // Add the title to the bars zone.
-  comparison.compsvg.append("text")
-    .attr("x", barsColX + barsColWidth/2)
-    .attr("y", margin.top - 10)
-    .attr("text-anchor", "middle")
-    .attr("font-size", "12px")
-    .attr("font-weight", "bold")
-    .text("Player vs Average");
   // Define some measures to draw the bars and to ensure they don't exceed column limits.
   const maxBarWidth = barsColWidth * 0.2;
   const centerX = barsColX + barsColWidth/2;
