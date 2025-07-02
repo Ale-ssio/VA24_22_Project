@@ -6,7 +6,7 @@ import { emptyRadar } from './radarChart.js';
 
 export function initializeHeader() {
   // Define the title of the project.
-  const title = "---PLACEHOLDER---";
+  const title = "FOOTBALL VISUAL ANALYTICS";
   // Add the logo of the page in the top left corner.
   const logoWidth = 30;
   const logoHeight = 30;
@@ -51,8 +51,10 @@ export function initializeMinutesFilter(state, plot, radar, market, comparison) 
       radar.radarGroup.selectAll(".playerShape").remove();
       radar.radarGroup.selectAll(".playerInfo").remove();
       radar.radarGroup.selectAll(".axisLabel").remove();
+      radar.radarsvg.selectAll(".playerInfo").remove();
       state.selectedPlayerKeys.clear();
       state.selectedPlayers.clear();
+      state.currentPlayerKey = null;
       emptyRadar(state, radar, plot);
       filterData(state, plot, radar, market, comparison);
     });
@@ -179,65 +181,4 @@ export function initializeResetButton(state, plot, radar, comparison) {
       // Redraw points to apply changes.
       draw(state.filteredData, state, plot, radar, comparison);
     });
-}
-
-export function updatePlayerButtons(state, plot, radar, comparison) {
-  const buttonContainer = d3.select(".playerButtons");
-  // Clear existing buttons.
-  buttonContainer.selectAll("*").remove();
-  if (state.selectedPlayerKeys.size === 0) {
-    // No players selected, hide buttons.
-    buttonContainer.style("display", "none");
-    return;
-  }
-  // Show buttons container.
-  buttonContainer.style("display", "flex");
-  // Create buttons for each selected player.
-  [...state.selectedPlayerKeys].forEach((playerKey, index) => {
-    // Find the player data to get name and squad.
-    const player = state.allData.find(d => `${d.Player}-${d.Squad}` === playerKey);
-    const buttonText = player ? `${player.Player} (${player.Squad})` : playerKey;
-    const button = buttonContainer
-      .append("button")
-      .attr("class", "player-btn")
-      .style("padding", "2px 2px")
-      .style("border", "2px solid")
-      .style("border-radius", "4px")
-      .style("background-color", index === comparison.currentPlayerIndex ? state.colors[index] : "lightgrey")
-      .style("color", index === comparison.currentPlayerIndex ? "white" : "#000000")
-      .style("cursor", "pointer")
-      .style("font-size", "10px")
-      .style("font-weight", "bold")
-      .style("transition", "all 0.2s")
-      .text(buttonText)
-      .on("click", function() {
-        // Update current player index.
-        comparison.currentPlayerIndex = index;
-        // Update button styles.
-        buttonContainer.selectAll(".player-btn")
-          .style("background-color", "lightgrey")
-          .style("color", "#000000");
-        d3.select(this)
-          .style("background-color", state.colors[index])
-          .style("color", "white");
-        // Redraw comparison for the selected player
-        drawPlayerComparison(playerKey, state, comparison);
-      })
-      .on("mouseover", function() {
-        if (index !== comparison.currentPlayerIndex) {
-          d3.select(this)
-            .style("background-color", "#000000")
-            .style("color", "white")
-            .style("opacity", "0.7");
-        }
-      })
-      .on("mouseout", function() {
-        if (index !== comparison.currentPlayerIndex) {
-          d3.select(this)
-            .style("background-color", "lightgrey")
-            .style("color", "black")
-            .style("opacity", "1");
-        }
-      });
-  });
 }

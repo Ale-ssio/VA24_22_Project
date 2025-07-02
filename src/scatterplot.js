@@ -128,11 +128,9 @@ export function updateScatterSelection(d, data, state, plot, radar, comparison) 
     draw everything again, which means a new point will be highlighted, a new
     star schema will be computed and new statistic will be compared in the graphs.
   */
-  comparison.currentPlayerIndex = 0;
   if (d) {
     state.selectedPlayerKeys.add(`${d.Player}-${d.Squad}`);
     state.selectedPlayers.add(d);
-    comparison.currentPlayerIndex = state.selectedPlayers.size - 1;
   }
   if (state.selectedPlayerKeys.size > 3) {
     const delKey = state.selectedPlayerKeys.values().next().value;
@@ -141,9 +139,9 @@ export function updateScatterSelection(d, data, state, plot, radar, comparison) 
     state.selectedPlayers.delete(delPlayer);
   }
   plot.tooltip.style("opacity", 0);
+  state.currentPlayerKey = d ? `${d.Player}-${d.Squad}` : state.currentPlayerKey;
+  if (!state.selectedPlayerKeys.has(state.currentPlayerKey)) state.currentPlayerKey = state.selectedPlayerKeys.values().next().value;
   drawRadarChart(d, state, plot, radar, comparison);
-  //updatePlayerButtons(state, comparison);
-  state.currentPlayerKey = d ? `${d.Player}-${d.Squad}` : state.selectedPlayerKeys.values().next().value;
   drawPlayerComparison(state.currentPlayerKey, state, comparison);
   drawSimilarPlayers(state, plot, radar, comparison);
   draw(data, state, plot, radar, comparison);

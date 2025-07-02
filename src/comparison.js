@@ -21,8 +21,6 @@ export function initializePlayerComparison(state, comparison) {
     .attr("opacity", 0.4)
     .attr("stroke", "black")
     .attr("stroke-width", 2);
-  // Initialize the currently displayed player index.
-  comparison.currentPlayerIndex = state.selectedPlayers.size - 1;
 }
 
 export function drawPlayerComparison(playerKey, state, comparison) {

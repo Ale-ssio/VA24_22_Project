@@ -88,8 +88,7 @@ import './index.scss';
     compHeight: 350,
     compLabels: [],
     compStats: [],
-    compsvg: null,
-    currentPlayerIndex: 0
+    compsvg: null
   }
 
   initializeScatterplot(state, plot, market);

@@ -166,37 +166,53 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
       .attr("stroke", state.colors[w])
       .attr("stroke-width", 2)
       .attr("d", radarLine);
-    // Add the player's name and position(s) above the chart.
-    radar.radarsvg.append("rect")
+    // Add a clickable card for each selected player to switch between them.
+    const infoGroup = radar.radarsvg.append("g")
       .attr("class", "playerInfo")
+      .style("cursor", "pointer")
+      .on("click", () => {
+        const key = `${player.Player}-${player.Squad}`;
+        state.currentPlayerKey = key;
+        updateScatterSelection(player, state.filteredData, state, plot, radar, comparison);
+      });
+    const isSelected = state.currentPlayerKey === `${player.Player}-${player.Squad}`;
+    console.log(state.currentPlayerKey);
+    infoGroup.append("rect")
+      .attr("x", 15)
+      .attr("y", w*50 + 15)
+      .attr("width", radar.radarWidth - 30)
+      .attr("height", 45)
+      .attr("rx", 6)
+      .attr("fill", "#f9f9f9")
+      .attr("stroke", isSelected ? state.colors[w] : "#cccccc")
+      .attr("stroke-width", isSelected ? 2.5 : 1);
+    // Add the player's name and position(s) to the group with a square showing his color.
+    infoGroup.append("rect")
       .attr("x", 20)
-      .attr("y", w*45 + 20)
+      .attr("y", w*50 + 30)
       .attr("width", 10)
       .attr("height", 10)
       .attr("fill", state.colors[w]);
-    radar.radarsvg.append("text")
-      .attr("class", "playerInfo")
+    infoGroup.append("text")
       .attr("x", 20 + 15)
-      .attr("y", w*45 + 20)
+      .attr("y", w*50 + 30)
       .attr("text-anchor", "start")
       .attr("font-size", "10px")
       .attr("fill", "#000000")
       .attr("font-weight", "bold")
       .text(`${player.Player} (${player.Pos})`);
     // Add the player's team and competition under the name.
-    radar.radarsvg.append("text")
-      .attr("class", "playerInfo")
+    infoGroup.append("text")
       .attr("x", 20 + 15)
-      .attr("y", w*45 + 30)
+      .attr("y", w*50 + 40)
       .attr("text-anchor", "start")
       .attr("font-size", "10px")
       .attr("fill", "#555555")
       .text(`${player.Squad} (${player.Comp})`);
     // Add the player's market value and age below the chart.
-    radar.radarsvg.append("text")
-      .attr("class", "playerInfo")
+    infoGroup.append("text")
       .attr("x", 20 + 15)
-      .attr("y", w*45 + 45)
+      .attr("y", w*50 + 55)
       .attr("text-anchor", "start")
       .attr("font-size", "10px")
       .attr("fill", "#000000")
@@ -205,10 +221,10 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
     // Define the button to deselect the players.
     const deselectButton = radar.radarsvg
       .append("image")
-      .attr("href", `/img/remove.svg`)
       .attr("class", "playerInfo")
-      .attr("x", radar.radarWidth - 25)
-      .attr("y", w*45 + 20)
+      .attr("href", `/img/remove.svg`)
+      .attr("x", radar.radarWidth - 35)
+      .attr("y", w*50 + 25)
       .attr("alt", "deselect")
       .attr("id", "deselect")
       .attr("width", 20)

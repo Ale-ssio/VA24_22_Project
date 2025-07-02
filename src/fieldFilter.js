@@ -4,6 +4,7 @@ import { draw } from './scatterplot.js';
 import { computeBoxplot } from './marketFilter.js';
 import { drawCorrelationHistogram } from './correlation.js';
 import { drawPlayerComparison } from './comparison.js';
+import { drawSimilarPlayers } from './similar.js';
 
 export function initializeFieldFilter(state, field, plot, radar, market, comparison) {
   // Define the size of the drawing of the field.
@@ -192,5 +193,6 @@ export function filterData(state, plot, radar, market, comparison) {
   computeBoxplot(state.filteredData, market);
   if (state.filteredData.length > 0) drawCorrelationHistogram(state.filteredData, radar, comparison);
   drawPlayerComparison(state.selectedPlayerKeys, state, comparison);
+  drawSimilarPlayers(state, plot, radar, comparison);
   draw(state.filteredData, state, plot, radar, comparison);
 }
