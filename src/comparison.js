@@ -13,7 +13,7 @@ export function initializePlayerComparison(comparison) {
     .attr("width", comparison.compWidth)
     .attr("height", comparison.compHeight)
     .attr("viewBox", [0, 0, comparison.compWidth, comparison.compHeight]);
-  // Define a rectangle arounf the svg to contain the area.
+  // Define a rectangle around the svg to contain the area.
   comparison.compsvg.append("rect")
     .attr("width", comparison.compWidth)
     .attr("height", comparison.compHeight)
@@ -25,8 +25,16 @@ export function initializePlayerComparison(comparison) {
 
 export function drawPlayerComparison(playerKey, state, comparison) {
   // Define the margin.
-  const margin = { top: 10, left: 10, label: 60, buffer: 45 };
-  const centerX = comparison.compWidth / 2;
+  const margin = { top: 30, bottom: 10, outer: 10};
+  // Divide the div in 3 columns and set the width of 2 of them.
+  // Keep the width of the column containing the bars dynamic.
+  const labelsColWidth = 82;
+  const legendColWidth = 50;
+  const barsColWidth = comparison.compWidth - labelsColWidth - legendColWidth - (margin.outer * 3);
+  // Fix the starting point of each column.
+  const labelsColX = margin.outer;
+  const barsColX = labelsColX + labelsColWidth + margin.outer;
+  const legendColX = barsColX + barsColWidth + margin.outer;
   // Find the player from the key.
   const player = state.allData.find(
     d => `${d.Player}-${d.Squad}` === playerKey
@@ -133,7 +141,7 @@ export function drawPlayerComparison(playerKey, state, comparison) {
   }
   // Empty the svg to draw the new bars each time.
   comparison.compsvg.selectAll("*").remove();
-  // Define a rectangle arounf the svg to contain the area.
+  // Define a rectangle around the svg to contain the area.
   comparison.compsvg.append("rect")
     .attr("width", comparison.compWidth)
     .attr("height", comparison.compHeight)
@@ -141,41 +149,100 @@ export function drawPlayerComparison(playerKey, state, comparison) {
     .attr("opacity", 0.4)
     .attr("stroke", "black")
     .attr("stroke-width", 2);
+  // Draw vertical lines to divide the 3 columns.
+  comparison.compsvg.append("line")
+    .attr("x1", barsColX - margin.outer/2)
+    .attr("x2", barsColX - margin.outer/2)
+    .attr("y1", margin.top)
+    .attr("y2", comparison.compHeight - margin.bottom)
+    .attr("stroke", "#999999")
+    .attr("stroke-width", 1)
+    .attr("stroke-dasharray", "2,2");
+  comparison.compsvg.append("line")
+    .attr("x1", legendColX - margin.outer/2)
+    .attr("x2", legendColX - margin.outer/2)
+    .attr("y1", margin.top)
+    .attr("y2", comparison.compHeight - margin.bottom)
+    .attr("stroke", "#999999")
+    .attr("stroke-width", 1)
+    .attr("stroke-dasharray", "2,2");
   // Define the categorical scale for the attributes on the y-axis.
   const y = d3.scaleBand()
     .domain(comparison.compStats)
-    .range([margin.top, comparison.compHeight - margin.top])
+    .range([margin.top, comparison.compHeight - margin.bottom])
     .padding(0.2);
-  // Define the maximum width of the bars to not go out of the svg even with the labels.
-  const barAreaWidth = centerX - margin.label - margin.buffer;
+  // Define a color scale to have different color w.r.t. how big the value is compared
+  // with the average. If the state is almost double the average one, the color is dark blue etc.
+  const colorScale = d3.scaleDiverging()
+    .domain([-100, 0, 100])
+    .interpolator(d3.interpolateRdBu);
+  // Add the legend showing how the color is assigned.
+  const legendHeight = comparison.compHeight - margin.top - margin.bottom - 20;
+  const legendWidth = 10;
+  const legendSteps = 50;
+  // Legend title.
+  comparison.compsvg.append("text")
+    .attr("x", legendColX + legendColWidth/2)
+    .attr("y", margin.top - 5)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "10px")
+    .attr("font-weight", "bold")
+    .text("% vs Avg");
+  // Create the gradient for the legend.
+  const legendGrad = comparison.compsvg.append("defs")
+    .append("linearGradient")
+    .attr("id", "legendGrad")
+    .attr("x1", "0%")
+    .attr("x2", "0%")
+    .attr("y1", "100%")
+    .attr("y2", "0");
+  // Add intermediate color stops to the gradient.
+  for (let i = 0; i <= legendSteps; i++) {
+    // From -100 to 100.
+    const pct = (i / legendSteps) * 200 - 100;
+    legendGrad.append("stop")
+      .attr("offset", `${(i / legendSteps) * 100}%`)
+      .attr("stop-color", colorScale(pct));
+  }
+  // Actually draw the legend.
+  comparison.compsvg.append("rect")
+    .attr("x", legendColX + margin.outer/4)
+    .attr("y", margin.top + 10)
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .attr("fill", "url(#legendGrad)")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1);
+  // Add legend labels.
+  const legendLabels = ["+100%", "0%", "-100%"];
+  const legendPos = [margin.top + 15, margin.top + legendHeight/2 + 10, margin.top + legendHeight + 5];
+  legendLabels.forEach((label, i) => {
+    comparison.compsvg.append("text")
+      .attr("x", legendColX + margin.outer/2 + legendWidth)
+      .attr("y", legendPos[i])
+      .attr("text-anchor", "start")
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .text(label);
+  });
+  // Add the title to the bars zone.
+  comparison.compsvg.append("text")
+    .attr("x", barsColX + barsColWidth/2)
+    .attr("y", margin.top - 10)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
+    .attr("font-weight", "bold")
+    .text("Player vs Average");
+  // Define some measures to draw the bars and to ensure they don't exceed column limits.
+  const maxBarWidth = barsColWidth * 0.2;
+  const centerX = barsColX + barsColWidth/2;
+  const textPadding = 5;
   // Define the scale to actually draw the bars.
   // I will normalize the stats just to draw the bars, so the domain will be [0, 1].
   const x = d3.scaleLinear()
     .domain([0, 1])
-    .range([0, barAreaWidth]);
-  // Define a color scale to have different color w.r.t. how big the value is compared
-  // with the average.
-  const colorScale = d3.scaleDiverging()
-    .domain([-1, 0, 1])
-    .interpolator(d3.interpolateRdBu);
-  // Add titles above bar groups.
-  comparison.compsvg.append("text")
-    .attr("x", centerX - barAreaWidth / 2 - 30)
-    .attr("y", margin.top)
-    .attr("text-anchor", "middle")
-    .attr("font-size", "12px")
-    .attr("font-weight", "bold")
-    .text("Current Average");
-  if (player) {
-    comparison.compsvg.append("text")
-      .attr("x", centerX + barAreaWidth / 2 + 30)
-      .attr("y", margin.top)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
-      .attr("font-weight", "bold")
-      .text(player.Player);
-  }
-// Draw the bars for each stat.
+    .range([0, maxBarWidth]);
+  // Draw the bars for each stat.
   comparison.compStats.forEach((stat, i) => {
     /* 
       Normalize each stat on the minimum and maximum values of that stat in the current 
@@ -208,54 +275,59 @@ export function drawPlayerComparison(playerKey, state, comparison) {
     const playerNorm = player ? normalize(playerValue) : 0;
     // Compute the vertical position using the scale of the stat.
     const yPos = y(stat);
-    // Compute the difference to assign the color.
-    const diff = player ? (playerNorm - groupNorm) : 0;
-    if (state.filteredData.length > 0 && !isNaN(groupNorm) && isFinite(groupNorm)) {
-      // Draw the average bars on the left.
-      comparison.compsvg.append("rect")
-        .attr("x", centerX - margin.buffer - x(groupNorm))
-        .attr("y", yPos)
-        .attr("width", x(groupNorm))
-        .attr("height", y.bandwidth())
-        .attr("fill", "#a6bddb")
-        .attr("stroke", "#000000")
-        .attr("stroke-width", 1);
-      // Add the value of the stat near the left bars.
+    // Add the labels for the stats in the left column.
+    comparison.compsvg.append("text")
+      .attr("x", labelsColX + 5)
+      .attr("y", yPos + y.bandwidth() / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "start")
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .text(comparison.compLabels[i]);
+    if (state.filteredData.length > 0) {
+      // Add the value of the average stats in the middle.
       comparison.compsvg.append("text")
-        .attr("x", centerX - margin.buffer - x(groupNorm) - 5)
+        .attr("x", centerX)
         .attr("y", yPos + y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .attr("text-anchor", "end")
-        .attr("font-size", "10px")
-        .text(groupValue.toFixed(1));
+        .attr("text-anchor", "middle")
+        .attr("font-size", "9px")
+        .text(`Avg: ${groupValue.toFixed(1)}`);
     }
-    if (player && !isNaN(playerNorm) && isFinite(playerNorm)) {
-      // Draw the player's bars on the right.
+    if (player) {
+      // Compute the difference to assign the color.
+      const diff = playerValue - groupValue;
+      const isAboveAvg = diff > 0;
+      // Compute how the player's value is in percentage w.r.t. the average one.
+      const pct = groupValue !== 0 ? (diff / groupValue) * 100 : 0;
+      const pctLabel = ` (${pct >= 0 ? "+" : ""}${Math.round(pct)}%)`;
+      // Take the difference between the normalized values and draw the bar with a width
+      // corresponding to such difference. I chose to use normalized values because otherwise
+      // I would have very different values and I would have needed a too big range in the scale.
+      const diffNorm = Math.abs(normalize(playerValue) - normalize(groupValue));
+      const barWidth = x(diffNorm);
+      // Calculate the positions of the bars to avoid overflow.
+      const barX = isAboveAvg ? centerX + 3*margin.outer : centerX - 3*margin.outer - barWidth;
+      const textX = isAboveAvg
+        ? Math.min(barX + barWidth + textPadding, barsColX + barsColWidth - 5)
+        : Math.max(barX - textPadding, barsColX + 5);
+      // Draw the player's bars on the right if the value is greater than the avg and on the left otherwise.
       comparison.compsvg.append("rect")
-        .attr("x", centerX + margin.buffer)
+        .attr("x", barX)
         .attr("y", yPos)
-        .attr("width", x(playerNorm))
+        .attr("width", barWidth)
         .attr("height", y.bandwidth())
-        .attr("fill", colorScale(Math.max(-1, Math.min(1, diff))))
+        .attr("fill", colorScale(Math.max(-100, Math.min(100, pct))))
         .attr("stroke", "#000000")
         .attr("stroke-width", 1);
       // Add the value of the stat near the right bars.
       comparison.compsvg.append("text")
-        .attr("x", centerX + margin.buffer + x(playerNorm) + 5)
+        .attr("x", textX)
         .attr("y", yPos + y.bandwidth() / 2)
         .attr("dy", "0.35em")
-        .attr("text-anchor", "start")
+        .attr("text-anchor", isAboveAvg ? "start" : "end")
         .attr("font-size", "10px")
-        .text(parseInt(playerValue.toFixed(1)));
+        .text(`${parseInt(playerValue.toFixed(1))}${pctLabel}`);
     }
-    // Add the labels for the stats.
-    comparison.compsvg.append("text")
-      .attr("x", centerX)
-      .attr("y", yPos + y.bandwidth() / 2)
-      .attr("dy", "0.35em")
-      .attr("text-anchor", "middle")
-      .attr("font-size", "10px")
-      .attr("font-weight", "bold")
-      .text(comparison.compLabels[i]);
   });
 }

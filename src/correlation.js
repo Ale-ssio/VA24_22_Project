@@ -15,10 +15,14 @@ function pearsonCorrelation(x, y) {
 }
 
 export function drawCorrelationHistogram(data, radar, comparison) {
-  // Define the size of the histogram.
-  const corrWidth = 500;
+  // Define the size of the graph.
+  const margin = { top: 10, right: 10, bottom: 60, left: 40, outer:10 };
+  const corrWidth = 540;
   const corrHeight = 180;
-  const margin = { top: 10, right: 20, bottom: 60, left: 40 };
+  const legendColWidth = 50;
+  const barsColWidth = corrWidth - legendColWidth - 2*margin.outer;
+  const barsColX = 0;
+  const legendColX = barsColWidth + margin.outer;
   /*
     Retrieve the column names on which compute the correlation values.
     Only numeric columns, not the market value one because it is the
@@ -75,7 +79,7 @@ export function drawCorrelationHistogram(data, radar, comparison) {
   */
   const x = d3.scaleBand()
     .domain(visibleCorrelations.map(d => d.key))
-    .range([margin.left, corrWidth - margin.right])
+    .range([margin.left, barsColWidth - margin.right])
     .padding(0.3);
   /*
     Create also a scale for the y-axis. The correlation is between 1 and -1
@@ -109,8 +113,23 @@ export function drawCorrelationHistogram(data, radar, comparison) {
     .append("svg")
     .attr("width", corrWidth)
     .attr("height", corrHeight);
+  // Create a group for the histogram area.
+  const barsGroup = svg.append("g")
+    .attr("transform", `translate(${barsColX}, 0)`);
+  // Create a group for the legend.
+  const legendGroup = svg.append("g")
+    .attr("transform", `translate(${legendColX}, 0)`)
+  // Add a vertical line to divide the columns.
+  svg.append("line")
+    .attr("x1", legendColX - margin.outer/2)
+    .attr("x2", legendColX - margin.outer/2)
+    .attr("y1", margin.top)
+    .attr("y2", corrHeight - margin.bottom)
+    .attr("stroke", "#999999")
+    .attr("stroke-width", 1)
+    .attr("stroke-dasharray", "2,2");
   // Draw the x axis with the previous scale and rotated labels.
-  svg.append("g")
+  barsGroup.append("g")
     .attr("transform", `translate(0,${corrHeight - margin.bottom})`)
     .call(d3.axisBottom(x))
     .selectAll("text")
@@ -118,7 +137,7 @@ export function drawCorrelationHistogram(data, radar, comparison) {
     .style("text-anchor", "end")
     .style("font-size", "10px");
   // Draw the y axis with the previous scale and 5 ticks to have better clarity.
-  svg.append("g")
+  barsGroup.append("g")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y).tickValues([-1, -0.5, 0, 0.5, 1]));
   // Define a div to have a tooltip when hovering a bar.
@@ -131,6 +150,57 @@ export function drawCorrelationHistogram(data, radar, comparison) {
     .style("padding", "5px")
     .style("pointer-events", "none")
     .style("font-size", "12px");
+  // Add the legend showing how the color is assigned.
+  const legendHeight = corrHeight - margin.top - margin.bottom - 20;
+  const legendWidth = 10;
+  const legendSteps = 50;
+  // Legend title.
+  legendGroup.append("text")
+    .attr("x", legendColWidth/2)
+    .attr("y", margin.top + 5)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "10px")
+    .attr("font-weight", "bold")
+    .text("Correlation");
+  // Create the gradient for the legend.
+  const legendGrad = svg.append("defs")
+    .append("linearGradient")
+    .attr("id", "legendGrad")
+    .attr("x1", "0%")
+    .attr("x2", "0%")
+    .attr("y1", "0%")
+    .attr("y2", "100%");
+  // Add intermediate color stops to the gradient.
+  for (let i = 0; i <= legendSteps; i++) {
+    // From -1 to 1.
+    const corrValue = 1 - (i/legendSteps) * 2;
+    legendGrad.append("stop")
+      .attr("offset", `${(i / legendSteps) * 100}%`)
+      .attr("stop-color", color(corrValue));
+  }
+  // Actually draw the legend.
+  legendGroup.append("rect")
+    .attr("x", (legendColWidth - legendWidth)/2)
+    .attr("y", margin.top + 20)
+    .attr("width", legendWidth)
+    .attr("height", legendHeight)
+    .attr("fill", "url(#legendGrad)")
+    .attr("stroke", "black")
+    .attr("stroke-width", 1);
+  // Add legend labels.
+  const legendLabels = ["+1.0", "+0.5", "+0.0", "- 0.5", "- 1.0"];
+  legendLabels.forEach((label, i) => {
+    const labelY = margin.top + 20 + (i / (legendLabels.length - 1)) * legendHeight;
+    // Add labels.
+    legendGroup.append("text")
+      .attr("x", (legendColWidth - legendWidth)/2 + legendWidth + margin.outer/2)
+      .attr("y", labelY)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "start")
+      .attr("font-size", "8px")
+      .attr("font-weight", "bold")
+      .text(label);
+  });
   /* 
     Create the bars based on the computed correlation values.
     Each bar is horizontally positioned on the respective attribute, and
@@ -139,7 +209,7 @@ export function drawCorrelationHistogram(data, radar, comparison) {
     correlation, the idea is just to draw them starting from the height or
     from the y=0 line directly.
   */
-  svg.selectAll(".bar")
+  barsGroup.selectAll(".bar")
     .data(visibleCorrelations)
     .enter()
     .append("rect")
@@ -161,9 +231,9 @@ export function drawCorrelationHistogram(data, radar, comparison) {
       tooltip.style("opacity", 0);
     });
   // Define a line passing on y=0 to divide positive and negative bars.
-  svg.append("line")
+  barsGroup.append("line")
     .attr("x1", margin.left)
-    .attr("x2", corrWidth - margin.right)
+    .attr("x2", barsColWidth - margin.right)
     .attr("y1", y(0))
     .attr("y2", y(0))
     .attr("stroke", "#000000")
