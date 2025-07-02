@@ -1,7 +1,6 @@
 // scatterplot.js
 import * as d3 from 'd3';
 import { drawRadarChart } from './radarChart.js';
-import { updatePlayerButtons } from './comparison.js';
 import { drawPlayerComparison } from './comparison.js';
 import { drawSimilarPlayers } from './similar.js';
 
@@ -143,9 +142,9 @@ export function updateScatterSelection(d, data, state, plot, radar, comparison) 
   }
   plot.tooltip.style("opacity", 0);
   drawRadarChart(d, state, plot, radar, comparison);
-  updatePlayerButtons(state, comparison);
-  const comparisonPlayer = d ? `${d.Player}-${d.Squad}` : state.selectedPlayerKeys.values().next().value;
-  drawPlayerComparison(comparisonPlayer, state, comparison);
+  //updatePlayerButtons(state, comparison);
+  state.currentPlayerKey = d ? `${d.Player}-${d.Squad}` : state.selectedPlayerKeys.values().next().value;
+  drawPlayerComparison(state.currentPlayerKey, state, comparison);
   drawSimilarPlayers(state, plot, radar, comparison);
   draw(data, state, plot, radar, comparison);
 }

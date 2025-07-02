@@ -9,7 +9,7 @@ export function drawSimilarPlayers(state, plot, radar, comparison) {
   // If no player is selected, add a title referring to the most valuable players.
   container.append("h3")
     .text(state.selectedPlayerKeys.size > 0
-      ? `Similar players to ${state.selectedPlayerKeys.values().next().value.split("-")[0]}`
+      ? `Similar players to ${state.currentPlayerKey.split("-")[0]}`
       : "Top 10 players by market value"
     )
     .style("margin-bottom", "2px");
@@ -30,7 +30,7 @@ export function drawSimilarPlayers(state, plot, radar, comparison) {
     return;
   }
   // Take the players from the filtered data by searching for it through the player key.
-  const selected = players.find(d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`));
+  const selected = players.find(d => state.currentPlayerKey === `${d.Player}-${d.Squad}`);
   if (!selected) return;
   /*
     Now I want to compute similarities between the selected player and all the others
@@ -102,14 +102,6 @@ function renderCards(players, container, state, plot, radar, comparison) {
     .style("cursor", "pointer")
     .style("box-shadow", "0 1px 3px rgba(0,0,0,0.1)")
     .on("click", (event, d) => {
-      if (state.selectedPlayerKeys.size >= 3) {
-        const delKey = state.selectedPlayerKeys.values().next().value;
-        state.selectedPlayerKeys.delete(delKey);
-        const delPlayer = state.selectedPlayers.values().next().value;
-        state.selectedPlayers.delete(delPlayer);
-      }
-      state.selectedPlayerKeys.add(`${d.Player}-${d.Squad}`);
-      state.selectedPlayers.add(d);
       updateScatterSelection(d, state.filteredData, state, plot, radar, comparison);
     });
   /* 

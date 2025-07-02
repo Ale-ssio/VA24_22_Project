@@ -31,6 +31,7 @@ import './index.scss';
     minutesFilterEnabled: false,
     selectedPlayerKeys: new Set(),
     selectedPlayers: new Set(),
+    currentPlayerKey: null,
     colors: ["#7fc97f", "#beaed4", "#fdc086"],
     allData: data,
     filteredData: data,
@@ -84,7 +85,7 @@ import './index.scss';
 
   let comparison = {
     compWidth: 500,
-    compHeight: 300,
+    compHeight: 350,
     compLabels: [],
     compStats: [],
     compsvg: null,
@@ -105,7 +106,7 @@ import './index.scss';
   initializeMarketValueFilter(state, plot, radar, market, comparison);
   computeBoxplot(state.filteredData, market);
   drawCorrelationHistogram(state.filteredData, radar, comparison);
-  drawPlayerComparison(state.selectedPlayerKey, state, comparison);
+  drawPlayerComparison(null, state, comparison);
   drawSimilarPlayers(state, plot, radar, comparison);
 
   draw(state.filteredData, state, plot, radar, comparison);

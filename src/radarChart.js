@@ -61,7 +61,7 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
     It makes no sense to compare goalkeepers and other players on the
     same statistics, so the set of labels is different in the two cases.
   */
-  const isGK = false;
+  let isGK = false;
   state.selectedPlayers.forEach(p => {
     if(p.Pos.includes('GK')) isGK = true;
   });

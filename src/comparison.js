@@ -6,14 +6,6 @@ export function initializePlayerComparison(state, comparison) {
     .append("text")
     .style("font-weight", "bold")
     .text("COMPARISON WITH THE AVERAGE OF THE CURRENT SUBSET:");
-  // Create a container for the buttons to pick a player from the selected ones.
-  d3.select(".comparison")
-    .append("div")
-    .attr("class", "playerButtons")
-    .style("margin", "10px 0")
-    .style("display", "flex")
-    .style("gap", "10px")
-    .style("flex-wrap", "wrap");
   // Define the svg containing the chart.
   comparison.compsvg = d3.select(".comparison")
     .append("svg")
@@ -31,67 +23,6 @@ export function initializePlayerComparison(state, comparison) {
     .attr("stroke-width", 2);
   // Initialize the currently displayed player index.
   comparison.currentPlayerIndex = state.selectedPlayers.size - 1;
-}
-
-export function updatePlayerButtons(state, comparison) {
-  const buttonContainer = d3.select(".playerButtons");
-  // Clear existing buttons.
-  buttonContainer.selectAll("*").remove();
-  if (state.selectedPlayerKeys.size === 0) {
-    // No players selected, hide buttons.
-    buttonContainer.style("display", "none");
-    return;
-  }
-  // Show buttons container.
-  buttonContainer.style("display", "flex");
-  // Create buttons for each selected player.
-  [...state.selectedPlayerKeys].forEach((playerKey, index) => {
-    // Find the player data to get name and squad.
-    const player = state.allData.find(d => `${d.Player}-${d.Squad}` === playerKey);
-    const buttonText = player ? `${player.Player} (${player.Squad})` : playerKey;
-    const button = buttonContainer
-      .append("button")
-      .attr("class", "player-btn")
-      .style("padding", "2px 2px")
-      .style("border", "2px solid")
-      .style("border-radius", "4px")
-      .style("background-color", index === comparison.currentPlayerIndex ? state.colors[index] : "lightgrey")
-      .style("color", index === comparison.currentPlayerIndex ? "white" : "#000000")
-      .style("cursor", "pointer")
-      .style("font-size", "10px")
-      .style("font-weight", "bold")
-      .style("transition", "all 0.2s")
-      .text(buttonText)
-      .on("click", function() {
-        // Update current player index.
-        comparison.currentPlayerIndex = index;
-        // Update button styles.
-        buttonContainer.selectAll(".player-btn")
-          .style("background-color", "lightgrey")
-          .style("color", "#000000");
-        d3.select(this)
-          .style("background-color", state.colors[index])
-          .style("color", "white");
-        // Redraw comparison for the selected player
-        drawPlayerComparison(playerKey, state, comparison);
-      })
-      .on("mouseover", function() {
-        if (index !== comparison.currentPlayerIndex) {
-          d3.select(this)
-            .style("background-color", "#000000")
-            .style("color", "white")
-            .style("opacity", "0.7");
-        }
-      })
-      .on("mouseout", function() {
-        if (index !== comparison.currentPlayerIndex) {
-          d3.select(this)
-            .style("background-color", "lightgrey")
-            .style("color", "black")
-            .style("opacity", "1");
-        }
-      });
-  });
 }
 
 export function drawPlayerComparison(playerKey, state, comparison) {
@@ -237,6 +168,24 @@ export function drawPlayerComparison(playerKey, state, comparison) {
     .attr("stroke", "#999999")
     .attr("stroke-width", 1)
     .attr("stroke-dasharray", "2,2");
+  // Write the name of the selected player or none.
+  if (!playerKey || !player) {
+    comparison.compsvg.append("text")
+      .attr("x", barsColX + barsColWidth/2)
+      .attr("y", comparison.compHeight / 2)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "14px")
+      .attr("fill", "#555555")
+      .text("No player selected");
+    return;
+  }
+  comparison.compsvg.append("text")
+    .attr("x", barsColX + barsColWidth/2)
+    .attr("y", 25)
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16px")
+    .attr("font-weight", "bold")
+    .text(player.Player);
   // Define the categorical scale for the attributes on the y-axis.
   const y = d3.scaleBand()
     .domain(comparison.compStats)
@@ -333,9 +282,6 @@ export function drawPlayerComparison(playerKey, state, comparison) {
       const range = safeDomain[1] - safeDomain[0];
       return range > 0 ? (value - safeDomain[0]) / range : 0;
     }
-    // Normalize the average statistic and the particular one (if any).
-    const groupNorm = normalize(groupValue);
-    const playerNorm = player ? normalize(playerValue) : 0;
     // Compute the vertical position using the scale of the stat.
     const yPos = y(stat);
     // Add the labels for the stats in the left column.
