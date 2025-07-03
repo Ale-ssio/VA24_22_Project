@@ -29,9 +29,8 @@ export function drawSimilarPlayers(state, plot, radar, comparison) {
     renderCards(topMarket, listDiv, state, plot, radar, comparison);
     return;
   }
-  // Take the players from the filtered data by searching for it through the player key.
-  const selected = players.find(d => state.currentPlayerKey === `${d.Player}-${d.Squad}`);
-  if (!selected) return;
+  // Take the players from the data by searching for it through the player key.
+  const selected = state.allData.find(d => state.currentPlayerKey === `${d.Player}-${d.Squad}`);
   /*
     Now I want to compute similarities between the selected player and all the others
     on the basis of all its statistics, which means I'm interested only in the
@@ -90,6 +89,18 @@ function renderCards(players, container, state, plot, radar, comparison) {
     because it will become the new selected players. New similar players will also
     be computed on the fly.
   */
+  if (players.length === 0) {
+    container.append("div")
+      .attr("class", "similar-card")
+      .style("padding", "6px 10px")
+      .style("margin", "4px 0")
+      .style("border", "1px solid #cccccc")
+      .style("border-radius", "5px")
+      .style("background", "#f9f9f9")
+      .style("color", "#555555")
+      .text(`No player from the current subset is similar to ${state.currentPlayerKey.split("-")[0]}`);
+    return;
+  }
   const cards = container.selectAll(".similar-card")
     .data(players)
     .enter()

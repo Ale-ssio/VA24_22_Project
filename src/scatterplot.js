@@ -43,7 +43,6 @@ export function initializeScatterplot(state, plot, market) {
   // Create the group that will contains all the data points.
   plot.plotGroup = plot.plotsvg
     .append("g");
-    console.log(plot.plotGroup);
   // Define the tooltip that will show the label of each point.      
   plot.tooltip = d3.select(".scatterplot")
     .append("div")

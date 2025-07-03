@@ -176,7 +176,6 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
         updateScatterSelection(player, state.filteredData, state, plot, radar, comparison);
       });
     const isSelected = state.currentPlayerKey === `${player.Player}-${player.Squad}`;
-    console.log(state.currentPlayerKey);
     infoGroup.append("rect")
       .attr("x", 15)
       .attr("y", w*50 + 15)
