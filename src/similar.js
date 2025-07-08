@@ -89,7 +89,7 @@ function renderCards(players, container, state, plot, radar, comparison) {
     because it will become the new selected players. New similar players will also
     be computed on the fly.
   */
-  if (players.length === 0) {
+  if (players.length === 0 && state.currentPlayerKey) {
     container.append("div")
       .attr("class", "similar-card")
       .style("padding", "6px 10px")
