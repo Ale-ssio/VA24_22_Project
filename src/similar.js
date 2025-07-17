@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { updateScatterSelection } from './scatterplot.js';
 
 export function drawSimilarPlayers(state, plot, radar, comparison) {
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
   // Empty the list from any previous player.
   const container = d3.select(".similar");
   container.selectAll("*").remove();
@@ -20,7 +21,7 @@ export function drawSimilarPlayers(state, plot, radar, comparison) {
     .style("overflow-y", "auto")
     .style("padding-right", "4px");
   // Start by considering only the current filtered data.
-  const players = state.filteredData;
+  const players = drawData;
   // If no player has been selected, order by market value and show the top 10.
   if (!state.selectedPlayerKeys.size > 0) {
     const topMarket = [...players]

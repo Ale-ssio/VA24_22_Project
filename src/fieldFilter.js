@@ -190,9 +190,21 @@ export function filterData(state, plot, radar, market, comparison) {
   */
   filtered = filtered.filter(d => +d.market_value_in_eur >= market.minMarket && +d.market_value_in_eur <= market.maxMarket);
   state.filteredData = filtered;
+  // Recompute brushedData only if a brush is active.
+  let brushed = null;
+  if (state.brushExtent) {
+    const [[x0, y0], [x1, y1]] = state.brushExtent;
+    brushed = filtered.filter(d => {
+      const cx = plot.xScale(d.x);
+      const cy = plot.yScale(d.y);
+      return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1;
+    });
+  }
+  state.brushedData = brushed;
   // After a filter is applied compute again the boxplot on the new set of data.
-  computeBoxplot(state.filteredData, market);
-  if (state.filteredData.length > 0) drawCorrelationHistogram(state.filteredData, radar, comparison);
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
+  computeBoxplot(drawData, market);
+  if (drawData.length > 0) drawCorrelationHistogram(drawData, radar, comparison);
   drawPlayerComparison(state.currentPlayerKey, state, comparison);
   drawSimilarPlayers(state, plot, radar, comparison);
   drawRadarChart(state.currentPlayerKey, state, plot, radar, comparison);

@@ -4,6 +4,7 @@ import crossfilter from 'crossfilter2';
 import { filterData } from './fieldFilter.js';
 
 export function initializeMarketValueFilter(state, plot, radar, market, comparison) {
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
   // Initialize the crossfilter to select the range of market values.
   const marketWidth = 500;
   const marketHeight = 30;
@@ -62,7 +63,7 @@ export function initializeMarketValueFilter(state, plot, radar, market, comparis
     .extent([[0, 0], [marketWidth, marketHeight]])
     .on("brush end", brushed);
   container.append("g")
-    .attr("class", "brush")
+    .attr("class", "mrktbrush")
     .call(brush);
   // Setup crossfilter and the dimension on which it will act.
   const cf = crossfilter(state.allData);
@@ -72,7 +73,7 @@ export function initializeMarketValueFilter(state, plot, radar, market, comparis
     Sort the data on the market value to pick the minimum and the maximum
     values and initialize the range to cover all the possible values.
   */
-  const sorted = state.filteredData.map(d => +d.market_value_in_eur).sort(d3.ascending);
+  const sorted = drawData.map(d => +d.market_value_in_eur).sort(d3.ascending);
   market.minMarket = sorted.at(0);
   market.maxMarket = sorted.at(sorted.length - 1);
   /*

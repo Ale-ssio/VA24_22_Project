@@ -3,8 +3,10 @@ import { loadData } from './dataLoader.js';
 import { initializeLeagueButtons,
          initializeHeader,
          initializeResetButton,
+         panBrushButtons,
          initializeMinutesFilter,
-         defineZoom } from './uiElements.js';
+         defineZoom,
+         defineBrush } from './uiElements.js';
 import { initializeScatterplot,
          draw } from './scatterplot.js';
 import { initializeFieldFilter } from './fieldFilter.js';
@@ -35,7 +37,9 @@ import './index.scss';
     colors: ["#7fc97f", "#beaed4", "#fdc086"],
     allData: data,
     filteredData: data,
+    brushedData: null,
     zoom: null,
+    brush: null,
     cf: null
   };
 
@@ -95,13 +99,15 @@ import './index.scss';
   initializeHeader();
   initializeMinutesFilter(state, plot, radar, market, comparison);
   initializeLeagueButtons(state, plot, radar, market, comparison);
-  initializeResetButton(state, plot, radar, comparison);
+  initializeResetButton(state, plot, radar, market, comparison);
   initializeFieldFilter(state, field, plot, radar, market, comparison);
   initializeRadarChart(radar);
   initializePlayerComparison(state, comparison);
   initializePlayerSearch(state, plot, radar, comparison);
   emptyRadar(state, radar, plot);
   defineZoom(state, plot, radar, comparison);
+  defineBrush(state, plot, radar, market, comparison);
+  panBrushButtons(state, plot, radar, comparison);
   initializeMarketValueFilter(state, plot, radar, market, comparison);
   computeBoxplot(state.filteredData, market);
   drawCorrelationHistogram(state.filteredData, radar, comparison);

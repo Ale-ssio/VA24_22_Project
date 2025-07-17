@@ -56,6 +56,7 @@ export function emptyRadar(state, radar, plot) {
 }
 
 export function drawRadarChart(d, state, plot, radar, comparison) {
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
   /*
     Choose the right stats and labels based on position.
     It makes no sense to compare goalkeepers and other players on the
@@ -105,7 +106,7 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
       the value is high in general. 
     */
     const playerPositions = player.Pos.split(',').map(p => p.trim());
-    const sameRolePlayers = state.filteredData.filter(d => {
+    const sameRolePlayers = drawData.filter(d => {
       const otherPositions = d.Pos.split(',').map(p => p.trim());
       // Set of players with at least one of the positions of the selected player.
       return playerPositions.some(pos => otherPositions.includes(pos));
@@ -162,7 +163,7 @@ export function drawRadarChart(d, state, plot, radar, comparison) {
       .datum(points)
       .attr("class", "playerShape")
       .attr("fill", state.colors[w])
-      .attr("fill-opacity", 0.4)
+      .attr("fill-opacity", 0.2)
       .attr("stroke", state.colors[w])
       .attr("stroke-width", 2)
       .attr("d", radarLine);

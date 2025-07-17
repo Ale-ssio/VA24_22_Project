@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { updateScatterSelection } from './scatterplot.js';
 
 export function initializePlayerSearch(state, plot, radar, comparison) {
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
   // I already have the search bar and the div for suggestions in the html.
   const input = d3.select(".player-search");
   const suggestionBox = d3.select(".suggestions");
@@ -20,7 +21,7 @@ export function initializePlayerSearch(state, plot, radar, comparison) {
       includes the sequence inserted by the user. Then take only the
       first 10 to have a smaller list.
     */
-    const matches = state.filteredData.filter(d => 
+    const matches = drawData.filter(d => 
       d.Player.toLowerCase().includes(typed)
     ).slice(0, 10);
     /*

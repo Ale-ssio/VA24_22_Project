@@ -24,6 +24,7 @@ export function initializePlayerComparison(state, comparison) {
 }
 
 export function drawPlayerComparison(playerKey, state, comparison) {
+  const drawData = state.brushedData ? state.brushedData : state.filteredData;
   // Define the margin.
   const margin = { top: 30, bottom: 10, outer: 10};
   // Divide the div in 3 columns and set the width of 2 of them.
@@ -43,9 +44,9 @@ export function drawPlayerComparison(playerKey, state, comparison) {
   let isGoalkeeper = false;
   if (player) isGoalkeeper = player.Pos.includes('GK');
   // Check if filtered data contains goalkeepers.
-  const hasGoalkeepers = state.filteredData.some(d => d.Pos.includes('GK'));
+  const hasGoalkeepers = drawData.some(d => d.Pos.includes('GK'));
   // Check if filtered data contains movement players.
-  const hasMovePlayers = state.filteredData.some(d => !d.Pos.includes('GK'));
+  const hasMovePlayers = drawData.some(d => !d.Pos.includes('GK'));
   // Determine if it is better to use goalkeeper stats or movement players ones w.r.t.
   // which type of player is selected and which roles are in the filtered data.
   let useGoalkeeperStats = false;
@@ -108,16 +109,16 @@ export function drawPlayerComparison(playerKey, state, comparison) {
   // Keep the minimum and the maximum value of each stat in the filtered data.
   const statDomains = {};
   // Only compute group stats if there is at least one sample in filtered data.
-  if (state.filteredData.length > 0) {
+  if (drawData.length > 0) {
     comparison.compStats.forEach(k => {
       // Compute the raw values instead of the per 90 minutes version.
       let values;
       if (k === 'MP' || k === 'Min') {
         // Directly use the raw values.
-        values = state.filteredData.map(d => +d[k]).filter(v => !isNaN(v));
+        values = drawData.map(d => +d[k]).filter(v => !isNaN(v));
       } else {
         // Convert per90 stats to raw using minutes played.
-        values = state.filteredData
+        values = drawData
           .map(d => {
             const stat = d[k];
             const min = d.Min;
@@ -291,7 +292,7 @@ export function drawPlayerComparison(playerKey, state, comparison) {
       .attr("font-size", "10px")
       .attr("font-weight", "bold")
       .text(comparison.compLabels[i]);
-    if (state.filteredData.length > 0) {
+    if (drawData.length > 0) {
       // Add the value of the average stats in the middle.
       comparison.compsvg.append("text")
         .attr("x", centerX)

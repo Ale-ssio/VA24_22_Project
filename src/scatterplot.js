@@ -87,7 +87,12 @@ export function draw(data, state, plot, radar, comparison) {
       .attr("cy", d => plot.yScale(d.y))
       .attr("r", d => plot.rScale(d.market_value_in_eur))
       .attr("fill", d => plot.colorScale(d.Comp))
-      .attr("opacity", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? 1 : 0.5)
+      .attr("opacity", d => {
+        const key = `${d.Player}-${d.Squad}`;
+        if (!state.brushedData || state.selectedPlayerKeys.has(key)) return 1;
+        else if (state.brushedData && state.brushedData.some(p => `${p.Player}-${p.Squad}` === key)) return 0.8;
+        else return 0.2;
+      })
       .attr("stroke", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? "#000000" : "none")
       .attr("stroke-width", d => state.selectedPlayerKeys.has(`${d.Player}-${d.Squad}`) ? 1.5 : 0)
       .on("mouseover", (event, d) => {

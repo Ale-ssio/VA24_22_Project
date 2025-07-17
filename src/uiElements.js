@@ -153,7 +153,95 @@ export function defineZoom(state, plot, radar, comparison) {
   plot.plotsvg.call(state.zoom);
 }
 
-export function initializeResetButton(state, plot, radar, comparison) {
+export function defineBrush(state, plot, radar, market, comparison) {
+  state.brush = d3.brush()
+    .extent([[0, 0], [plot.plotsvg.attr("width"), plot.plotsvg.attr("height")]])
+    .on("end", function (event) {
+      if (!event.selection) {
+        state.brushExtent = null;
+        state.brushedData = null;
+        filterData(state, plot, radar, market, comparison);
+        return;
+      }
+      const [[x0, y0], [x1, y1]] = event.selection;
+      let brushedData = state.filteredData;
+      brushedData = brushedData.filter(d => {
+        const cx = plot.xScale(d.x);
+        const cy = plot.yScale(d.y);
+        return cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1;
+      });
+      // Update filteredData but do NOT change selectedPlayers.
+      state.brushedData = brushedData;
+      state.brushExtent = event.selection;
+      filterData(state, plot, radar, market, comparison)
+    });
+}
+
+export function panBrushButtons(state, plot, radar, comparison) {
+  // Define a new group for the buttons.
+  const uiGroup = plot.plotsvg
+    .append("g")
+    .attr("class", "uiGroup");
+  // Helper: deactivate brush.
+  function disableBrush() {
+    plot.plotGroup.selectAll(".brush").remove();
+  }
+  // Helper: deactivate zoom.
+  function disableZoom() {
+    plot.plotsvg.on(".zoom", null);
+  }
+  // Helper: reactivate brush.
+  function enableBrush() {
+    plot.plotGroup.append("g")
+    .attr("class", "brush")
+    .call(state.brush);
+  }
+  // Helper: reactivate zoom.
+  function enableZoom() {
+    plot.plotsvg.call(state.zoom);
+  }
+  // Define the button to pan and click.
+  const panButton = uiGroup
+    .append("image")
+    .attr("href", `/img/pointer.svg`)
+    .attr("class", "uiButton")
+    .attr("alt", "Pan")
+    .attr("id", "pan")
+    .attr("width", plot.margin - 5)
+    .attr("height", plot.margin - 5)
+    .attr("x", 5)
+    .attr("y", plot.plotHeight + plot.margin - 1)
+    .style("cursor", "pointer")
+    .on("click", function() {
+      d3.select(this).attr("opacity", 1);
+      d3.select("#brush").attr("opacity", 0.4);
+      disableBrush();
+      enableZoom();
+    });
+  // Define the button to brush.
+  const brushButton = uiGroup
+    .append("image")
+    .attr("href", `/img/area.svg`)
+    .attr("class", "uiButton")
+    .attr("alt", "Brush")
+    .attr("id", "brush")
+    .attr("width", plot.margin - 5)
+    .attr("height", plot.margin - 5)
+    .attr("x", plot.margin + 5)
+    .attr("y", plot.plotHeight + plot.margin - 1)
+    .style("cursor", "pointer")
+    .on("click", function() {
+      d3.select(this).attr("opacity", 1);
+      d3.select("#pan").attr("opacity", 0.4);
+      disableZoom();
+      enableBrush();
+    });
+  // Initialize with pan active by default
+  panButton.dispatch("click");
+}
+
+
+export function initializeResetButton(state, plot, radar, market, comparison) {
   // Define a new group for the resize button.
   const uiGroup = plot.plotsvg
     .append("g")
@@ -161,12 +249,12 @@ export function initializeResetButton(state, plot, radar, comparison) {
   // Define the button to bring the zoom back to the original one.
   const resetButton = uiGroup
     .append("image")
-    .attr("href", `/img/resize.svg`)
+    .attr("href", `/img/reload.svg`)
     .attr("class", "uiButton")
     .attr("alt", "Reset")
     .attr("id", "reset")
-    .attr("width", plot.margin)
-    .attr("height", plot.margin)
+    .attr("width", plot.margin - 5)
+    .attr("height", plot.margin - 5)
     .attr("x", plot.plotWidth + plot.margin)
     .attr("y", plot.plotHeight + plot.margin)
     .style("cursor", "pointer")
@@ -178,7 +266,10 @@ export function initializeResetButton(state, plot, radar, comparison) {
       // Reset the scales to the original ones.
       plot.xScale = plot.originalXScale.copy();
       plot.yScale = plot.originalYScale.copy();
-      // Redraw points to apply changes.
-      draw(state.filteredData, state, plot, radar, comparison);
+      // Load again the entire dataset in the filtered one.
+      state.brushedData = null;
+      state.brushExtent = null;
+      plot.plotGroup.selectAll(".brush").remove();
+      filterData(state, plot, radar, market, comparison)
     });
 }
